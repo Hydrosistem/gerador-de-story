@@ -53,7 +53,7 @@ O id da implantação aparece em `clasp list-deployments` (a linha com "Gerador 
 
 ### 4. Publicar o login do Google
 Enquanto a tela de login estiver "Em teste", só entra quem está em **Usuários de teste** (Google Auth Platform → Público). Para liberar de vez:
-1. Google Auth Platform → **Branding**: página inicial `https://gerador-de-story.pages.dev`, política de privacidade `https://gerador-de-story.pages.dev/privacidade.html`, domínio autorizado `gerador-de-story.pages.dev`.
+1. Google Auth Platform → **Branding**: página inicial `https://gerador-de-story.pages.dev`, política de privacidade `https://gerador-de-story.pages.dev/privacidade`, domínio autorizado `gerador-de-story.pages.dev`.
 2. Google Auth Platform → **Público** → **Publicar app** → Confirmar.
 
 ### 5. Celular
