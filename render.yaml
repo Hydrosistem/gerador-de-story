@@ -1,0 +1,18 @@
+# Publicação no Render (render.com): New → Blueprint → escolha este repositório.
+services:
+  - type: web
+    name: lar-de-achadinhos
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/me
+    envVars:
+      - key: ONLINE
+        value: "1"
+      - key: APP_USER
+        sync: false        # o Render pede para você digitar (ex.: admin)
+      - key: APP_PASSWORD
+        sync: false        # o Render pede para você digitar a senha de acesso
+      - key: SESSION_SECRET
+        generateValue: true
