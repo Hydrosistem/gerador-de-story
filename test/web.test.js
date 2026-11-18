@@ -61,3 +61,18 @@ test('link sem preço avisa para digitar o preço antes de publicar', () => {
   assert.ok(ini >= 0, 'pullFromLink não encontrado');
   assert.match(corpo, /if\(!r\.preco\)status\('Não achei o preço nesse link\. Digite o preço antes de publicar\.',true\)/);
 });
+
+test('tela de entrada tem exemplo de arte e os 3 passos, no estilo do Post', () => {
+  const login = html.slice(html.indexOf('<div id="telaLogin"'), html.indexOf('<main id="app"'));
+  assert.match(login, /<img src="exemplo-story\.jpg"/);
+  assert.ok(existe('exemplo-story.jpg'), 'web/exemplo-story.jpg não existe');
+  for (const passo of ['Cole o link', 'Gere o cenário', 'Baixe a arte']) assert.ok(login.includes(passo), passo);
+});
+
+test('topo verde com ícone, nome do app e barra de ícones', () => {
+  const topo = html.slice(html.indexOf('<header>'), html.indexOf('</header>'));
+  assert.match(topo, /<h1>Gerador de Story<\/h1>/);
+  assert.match(topo, /class="lojas"/);
+  assert.match(html, /<meta name="theme-color" content="#128c7e">/);
+  assert.equal(JSON.parse(web('manifest.json')).theme_color, '#128c7e');
+});

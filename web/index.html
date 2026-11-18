@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gerador de Story</title>
-<meta name="theme-color" content="#111318">
+<meta name="theme-color" content="#128c7e">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,9 +12,19 @@
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#17191d;--muted:#68707d;--line:#e4e7ec;--green:#08d66a;--yellow:#ffc400;--orange:#f05a19;--dark:#101114}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
-header{background:#111318;color:#fff;padding:19px max(18px,calc((100% - 1260px)/2));display:flex;align-items:center;justify-content:space-between;gap:14px}
-header h1{font-size:21px;line-height:1.15;margin:0}header p{margin:5px 0 0;color:#b8bdc7;font-size:12px}
-.pill{border:1px solid #3d424c;border-radius:99px;padding:7px 11px;color:#d7fbe6;font-size:11px;white-space:nowrap}
+:root{--wa:#25d366;--wa-escuro:#128c7e;--wa-claro:#e7f8ee}
+header{background:linear-gradient(135deg,#2fe07a 0%,#1fb85a 50%,#128c7e 100%);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 16px 20px;border-radius:0 0 24px 24px;box-shadow:0 6px 20px rgba(18,140,126,.25);display:flex;flex-direction:column;align-items:center;gap:12px}
+.marca{display:flex;align-items:center;gap:12px}
+.marca img{width:46px;height:46px;border-radius:14px;border:2.5px solid #fff;box-shadow:0 4px 12px rgba(6,70,60,.3)}
+header h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.3px;line-height:1.15}
+header p{margin:2px 0 0;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.88)}
+.lojas{display:flex;align-items:center;gap:4px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.55);box-shadow:0 6px 18px rgba(6,70,60,.18),inset 0 1px 0 rgba(255,255,255,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.lojas span{width:34px;height:30px;display:grid;place-items:center;color:#fff}
+.lojas i{width:1px;height:16px;background:rgba(255,255,255,.4)}
+.lojas svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.contabar{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:1260px;margin:10px auto 0;padding:0 20px;font-size:13px;color:var(--muted)}
+.contabar strong{color:var(--ink)}
+.contabar button{padding:6px 12px;font-size:12px;border-radius:8px;background:#fff;border:1px solid var(--line);color:var(--ink)}
 main{max-width:1260px;margin:0 auto;padding:20px;display:grid;grid-template-columns:minmax(320px,430px) minmax(320px,1fr);gap:20px;align-items:start}
 .panel,.preview{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 25px #1018280a}
 .panel{padding:18px}.preview{padding:18px;position:sticky;top:14px}
@@ -33,7 +43,7 @@ input[type=checkbox]{width:auto;accent-color:#0c9e51;margin:0}
 .actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
 button{border:0;border-radius:10px;padding:11px 13px;font:700 12px/1.2 inherit;cursor:pointer;transition:.15s}
 button:hover{filter:brightness(.96);transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.primary{background:#111318;color:#fff;width:100%;padding:14px;margin-top:5px}.green{background:#0c9e51;color:#fff}.soft{background:#eef1f5;color:#222}.outline{background:#fff;border:1px solid #d7dce3;color:#252932}
+.primary{background:var(--wa-escuro);color:#fff;width:100%;padding:14px;margin-top:5px}.green{background:#1da851;color:#fff}.soft{background:#eef1f5;color:#222}.outline{background:#fff;border:1px solid #d7dce3;color:#252932}
 .ai{background:linear-gradient(135deg,#6d28d9,#db2777);color:#fff}
 .small{font-size:11px;font-weight:600;padding:8px 10px}
 .previewtop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.previewtop h2{margin:0}
@@ -46,7 +56,7 @@ canvas{display:block;width:min(100%,405px);height:auto;aspect-ratio:9/16;border-
 .status{min-height:18px;color:#087c3c;font-size:11px;margin-top:8px}.status.err{color:#b42318}
 .tip{padding:10px 11px;background:#fff8df;border:1px solid #f4e5a8;border-radius:10px;font-size:11px;color:#645018;margin-top:12px}
 .linkrow{display:flex;gap:7px}.linkrow input{flex:1}
-.capture{background:linear-gradient(135deg,#fffbe6,#eefcf3);border:1px solid #e7e2b8;border-radius:13px;padding:14px;margin-bottom:17px}
+.capture{background:linear-gradient(135deg,#e3f9ec,#f3fcf7);border:1px solid #b9e8cc;border-radius:13px;padding:14px;margin-bottom:17px}
 .capture h2{margin-bottom:8px}
 .steps{margin:0 0 12px;padding-left:19px;font-size:12px;color:#383d46}.steps li{margin-bottom:4px}
 .bmrow{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
@@ -57,30 +67,61 @@ details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[op
 @media(max-width:850px){main{grid-template-columns:1fr;padding:12px}.preview{position:static;order:-1}header{padding:15px 14px}.preview canvas{width:min(78vw,405px)}}
 @media(max-width:420px){.uploads{grid-template-columns:1fr}.grid2{gap:8px}.panel,.preview{padding:13px}}
 [hidden]{display:none!important}
-#telaLogin{min-height:calc(100vh - 90px);display:grid;place-items:center;padding:24px 16px}
-.logincard{max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 25px #1018280a;padding:28px 22px;display:grid;gap:14px;text-align:center}
-.logincard h2{justify-content:center;font-size:22px;margin:0}
-.logincard p{margin:0;color:var(--muted);font-size:14px}
-.logincard .aceite{font-size:11px}.logincard .aceite a{color:var(--muted)}
+#telaLogin{max-width:560px;margin:22px auto 32px;padding:0 16px;display:grid;gap:14px;text-align:center;justify-items:center}
+#telaLogin h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px;line-height:1.2;justify-content:center}
+#telaLogin p{margin:0;color:var(--muted);font-size:14.5px}
+#telaLogin .apoio{font-size:15px;line-height:1.45;margin-top:-6px}
+#telaLogin .aceite{font-size:12px}#telaLogin .aceite a{color:var(--muted)}
 #botaoGoogle{display:flex;justify-content:center;min-height:44px}
 #avisoLogin{font-size:13px;color:var(--muted);white-space:pre-line}#avisoLogin:empty{display:none}#avisoLogin.erro{color:#b42318}
-.conta{color:#b8bdc7;font-size:12px;white-space:nowrap}.conta strong{color:#fff}
-@media(max-width:560px){header{flex-wrap:wrap;gap:8px}header .pill{display:none}}
+.exemplo{display:grid;gap:8px;justify-items:center;margin-top:4px}
+.exemplo .etiqueta{font-size:11.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.exemplo img{width:min(240px,70vw);height:auto;aspect-ratio:9/16;border-radius:16px;border:4px solid #fff;box-shadow:0 10px 30px rgba(16,24,40,.18);background:#d9d5cc}
+.passos{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:4px 0 0;padding:0;list-style:none}
+.passos li{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px 7px 7px;font-size:13.5px;font-weight:600}
+.passos b{width:22px;height:22px;border-radius:50%;background:var(--wa);color:#fff;display:grid;place-items:center;font-size:12px}
+@media(max-width:560px){.contabar{padding:0 14px}}
 </style>
 </head>
 <body>
 <header>
- <div><h1>🏠 Lar de Achadinhos</h1><p>Gerador de artes promocionais · Mercado Livre · Status do WhatsApp</p></div>
- <div style="display:flex;gap:8px;align-items:center"><span class="pill">STORY 9:16 · 1080 × 1920</span><span id="conta" class="conta" hidden>Olá, <strong id="nomeConta"></strong></span><button class="small" id="logout" type="button" hidden style="background:#2a2e36;color:#fff">Sair</button></div>
-</header>
-<div id="telaLogin" hidden>
- <div class="logincard">
-  <h2>🏠 Gerador de Story</h2>
-  <p>Cole o link de afiliado do Mercado Livre e receba a arte do Status pronta, com cenário de IA.</p>
-  <div id="avisoLogin" role="status"></div>
-  <div id="botaoGoogle"></div>
-  <p class="aceite">Ao entrar, você concorda com a <a href="privacidade.html">Política de Privacidade</a>.</p>
+ <div class="marca">
+  <img src="icon-192.png" alt="" width="46" height="46">
+  <div><h1>Gerador de Story</h1><p>Arte do Status em segundos</p></div>
  </div>
+ <div class="lojas" aria-hidden="true">
+  <svg width="0" height="0" style="position:absolute">
+   <symbol id="ic-tech" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></symbol>
+   <symbol id="ic-moda" viewBox="0 0 24 24"><path d="M8 3l-5 3 2 5 3-1v11h8V10l3 1 2-5-5-3c0 2-1.8 3.5-4 3.5S8 5 8 3z"/></symbol>
+   <symbol id="ic-casa" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M10 21v-6h4v6"/></symbol>
+   <symbol id="ic-beleza" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+   <symbol id="ic-presente" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+   <symbol id="ic-oferta" viewBox="0 0 24 24"><path d="M12.6 2.6l8.8 8.8a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+  </svg>
+  <span><svg><use href="#ic-tech"/></svg></span><i></i>
+  <span><svg><use href="#ic-moda"/></svg></span><i></i>
+  <span><svg><use href="#ic-casa"/></svg></span><i></i>
+  <span><svg><use href="#ic-beleza"/></svg></span><i></i>
+  <span><svg><use href="#ic-presente"/></svg></span><i></i>
+  <span><svg><use href="#ic-oferta"/></svg></span>
+ </div>
+</header>
+<div id="conta" class="contabar" hidden><span>Olá, <strong id="nomeConta"></strong></span><button id="logout" type="button" hidden>Sair</button></div>
+<div id="telaLogin" hidden>
+ <h2>Sua arte de Status pronta em segundos</h2>
+ <p class="apoio">Cole o link de afiliado do Mercado Livre e receba a arte do Status com cenário de IA, pronta para postar.</p>
+ <div id="avisoLogin" role="status"></div>
+ <div id="botaoGoogle"></div>
+ <p class="aceite">Ao entrar, você concorda com a <a href="privacidade.html">Política de Privacidade</a>.</p>
+ <div class="exemplo">
+  <span class="etiqueta">Exemplo</span>
+  <img src="exemplo-story.jpg" alt="Exemplo de arte de Status: boné por R$ 39,90 com selo de desconto" width="270" height="480" loading="lazy">
+ </div>
+ <ol class="passos">
+  <li><b>1</b>Cole o link</li>
+  <li><b>2</b>Gere o cenário</li>
+  <li><b>3</b>Baixe a arte</li>
+ </ol>
 </div>
 <main id="app" hidden>
 <section class="panel">
