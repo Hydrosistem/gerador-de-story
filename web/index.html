@@ -10,7 +10,7 @@
 <link rel="icon" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="icon-192.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Inter:wght@800&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Montserrat:wght@900&family=Poppins:wght@800&family=Righteous&family=Bangers&family=Lobster&family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Inter:wght@800&family=Bodoni+Moda:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@400;500;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Montserrat:wght@900&family=Poppins:wght@800&family=Righteous&family=Bangers&family=Lobster&family=Pacifico&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#17191d;--muted:#68707d;--line:#e4e7ec;--green:#08d66a;--yellow:#ffc400;--orange:#f05a19;--dark:#101114}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
@@ -149,6 +149,7 @@ details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[op
    <div class="field"><label for="payment">Condição</label><select id="payment"><option value="no Pix">no Pix</option><option value="à vista">à vista</option><option value="no cartão">no cartão</option><option value="">sem condição</option></select></div>
    <div class="field"><label for="coupon">Cupom (opcional)</label><input id="coupon" placeholder="Ex.: PARAVOCEDEZ" maxlength="20"></div>
   </div>
+  <div class="field"><label for="cardPrice">Preço no cartão (opcional)</label><input id="cardPrice" value="" inputmode="decimal" placeholder="Ex.: 48,40"><p class="hint">Aparece como "ou R$ … no cartão" no modelo Elegante.</p></div>
  </div>
 
  <div class="section">
@@ -172,6 +173,7 @@ details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[op
 
  <div class="section">
   <h2><span class="num">3</span> Identidade da arte</h2>
+  <div class="field"><label for="modelo">Modelo da arte</label><select id="modelo"><option value="impacto">Impacto · cores fortes, etiqueta e selo de desconto</option><option value="elegante">Elegante · tons neutros, letras finas e detalhes dourados</option></select></div>
   <div class="grid2">
    <div class="field"><label for="brand">Marca no topo</label><input id="brand" value="LAR DE ACHADINHOS" placeholder="Vazio = sem marca" maxlength="28"></div>
    <div class="field"><label for="pill">Selo do canto</label><input id="pill" value="PARCERIA PAGA" maxlength="22" placeholder="Vazio = sem selo"></div>
@@ -296,7 +298,7 @@ const MSG_INFO={
 };
 const $=id=>document.getElementById(id),canvas=$('art'),ctx=canvas.getContext('2d');
 let productSrc=null,productImg=null,productCut=false,bgImg=null,bgIntegrated=false,bgJob=0;
-const fields=['title','price','old','campaign','tagWord','payment','coupon','link','mode','category','extra','zoom','ypos','brand','brandFont','brandColor','brandSize','pill','disclaimer','accent'];
+const fields=['title','price','old','cardPrice','modelo','campaign','tagWord','payment','coupon','link','mode','category','extra','zoom','ypos','brand','brandFont','brandColor','brandSize','pill','disclaimer','accent'];
 
 // ---------- Cenários ----------
 const SCENES={
@@ -333,16 +335,18 @@ const KEYWORDS=[
 ];
 $('category').innerHTML=Object.entries(SCENES).map(([k,s])=>`<option value="${k}">${s.label}</option>`).join('');
 function detectScene(text){const t=String(text||'').toLowerCase();for(const [k,rx] of KEYWORDS)if(rx.test(t))return k;return null}
+// No modelo Elegante a cena puxa para tons neutros e ar de catálogo sofisticado.
+function estiloCena(){return $('modelo').value==='elegante'?'Elegant, minimalist and sophisticated interior styling, soft natural window light, warm neutral beige, cream and light wood tones, calm editorial luxury catalog look. ':''}
 function scenePrompt(){
  const s=SCENES[$('category').value]||SCENES.sala,extra=$('extra').value.trim();
- return `Vertical 9:16 professional photograph used as the background of a product advertisement: ${s.en}. The lower-middle center of the frame is an empty, clear surface where a product will be placed later, so do not show any product, object or device in the center. ${extra?'Style details: '+extra+'. ':''}Soft natural lighting, gentle depth of field with a softly blurred background, realistic, premium e-commerce photography, warm and inviting, clean and uncluttered composition. No text, no letters, no logos, no people, no watermark.`;
+ return `Vertical 9:16 professional photograph used as the background of a product advertisement: ${s.en}. The lower-middle center of the frame is an empty, clear surface where a product will be placed later, so do not show any product, object or device in the center. ${estiloCena()}${extra?'Style details: '+extra+'. ':''}Soft natural lighting, gentle depth of field with a softly blurred background, realistic, premium e-commerce photography, warm and inviting, clean and uncluttered composition. No text, no letters, no logos, no people, no watermark.`;
 }
 function productScenePrompt(){
  const s=SCENES[$('category').value]||SCENES.sala,extra=$('extra').value.trim(),name=$('title').value.trim();
  return `Create a vertical 9:16 professional advertising photograph of THIS EXACT product from the reference image, placed naturally in ${s.en}. `+
  `Keep the product 100% identical to the reference: same shape, proportions, colors, materials, logo and details. Do not redesign it, do not add or remove parts, do not change its text or brand.${name?' (The product is: '+name+'.)':''} `+
  `The product is the hero of the photo: realistic scale, resting on a surface, centered horizontally and keep it in the same position and size it has in the reference image (centered, in the middle band of the frame), medium-sized, about 50% of the image width. The ENTIRE product must be fully visible inside the frame, never cropped or cut by the image edges, with free space around it on all sides, with natural contact shadows, reflections and lighting that match the scene. `+
- `Keep the top 16% and the bottom 35% of the image calm and uncluttered, because text will be overlaid there. ${extra?'Style details: '+extra+'. ':''}`+
+ `Keep the top 16% and the bottom 35% of the image calm and uncluttered, because text will be overlaid there. ${estiloCena()}${extra?'Style details: '+extra+'. ':''}`+
  `Soft natural light, gentle depth of field, premium e-commerce photography. No added text, no letters, no extra products, no people, no watermark.`;
 }
 
@@ -394,6 +398,7 @@ function priceLayout(){
 }
 
 function draw(){
+ if($('modelo').value==='elegante'){drawElegante();return}
  const W=1080,H=1920,accent=$('accent').value;ctx.clearRect(0,0,W,H);
  if(bgImg&&bgIntegrated)fitWidth(bgImg,W,H);else if(bgImg)cover(bgImg,0,0,W,H);else{let g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#dedbd3');g.addColorStop(.5,'#c5c0b5');g.addColorStop(1,'#817a70');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(0,0,W,1160)}
  // Sombras para o texto aparecer em qualquer cenário
@@ -414,6 +419,109 @@ function draw(){
  drawPriceBlock(accent,L);
  // Aviso lateral
  if($('disclaimer').value){ctx.save();ctx.translate(26,960);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`400 19px ${F_MONO}`;ctx.letterSpacing='2px';ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillText('*preços sujeitos a alterações',0,0);ctx.restore();ctx.letterSpacing='0px'}
+}
+
+// ---------- Modelo Elegante: tons neutros, letras com serifa e detalhes dourados ----------
+const F_SERIF="'Bodoni Moda','Didot','Bodoni 72',Georgia,serif",F_SANS="'Jost','Segoe UI',Arial,sans-serif";
+const EL={X:76,R:1004,ouro:'#c9a96e',creme:'#f4efe6',linkY:1762,pTop:350};
+// "LAR DE ACHADINHOS" → "Lar de Achadinhos" (a marca em itálico fica melhor sem caixa alta)
+function marcaElegante(t){
+ if(t!==t.toUpperCase())return t;
+ return t.toLowerCase().replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase()).replace(/ (De|Da|Do|Das|Dos|E) /g,m=>m.toLowerCase());
+}
+function layoutPrecoElegante(base){
+ const p=money($('price').value),o=money($('old').value),c=money($('cardPrice').value),pay=$('payment').value.trim().toUpperCase();
+ const [pi,pc]=(p?fmt(p):'0,00').split(','),hasOld=o>p&&p>0;
+ const dir=[];if(hasOld)dir.push({t:'de R$ '+fmt(o),antigo:true});if(c>0)dir.push({t:`ou R$ ${fmt(c)} no cartão`});
+ ctx.font=`400 27px ${F_SANS}`;let colW=0;dir.forEach(l=>{ctx.font=l.antigo?`400 27px ${F_SANS}`:`500 28px ${F_SANS}`;colW=Math.max(colW,ctx.measureText(l.t).width)});
+ const limite=(dir.length?EL.R-colW-36:EL.R)-EL.X;
+ const fI=capSize(128,F_SERIF),fC=capSize(44,F_SERIF),fR=capSize(23,F_SANS);
+ const larg=S=>{ctx.font=`700 ${fR*S}px ${F_SANS}`;let w=ctx.measureText('R$').width+16*S;ctx.font=`500 ${fI*S}px ${F_SERIF}`;w+=ctx.measureText(pi).width+8*S;
+  ctx.font=`500 ${fC*S}px ${F_SERIF}`;let r=ctx.measureText(','+pc).width;if(pay){ctx.font=`500 ${19*S}px ${F_SANS}`;ctx.letterSpacing=`${4*S}px`;r=Math.max(r,ctx.measureText(pay).width+28*S);ctx.letterSpacing='0px'}return w+r};
+ let S=1;while(larg(S)>limite&&S>.6)S-=.03;
+ return {pi,pc,pay,dir,S,fI,fC,fR,base,topo:base-128*S};
+}
+function drawPrecoElegante(L){
+ const {pi,pc,pay,dir,S,fI,fC,fR,base}=L;let x=EL.X;
+ ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle=EL.creme;
+ shadowed(()=>{
+  ctx.font=`700 ${fR*S}px ${F_SANS}`;ctx.fillText('R$',x,base);x+=ctx.measureText('R$').width+16*S;
+  ctx.font=`500 ${fI*S}px ${F_SERIF}`;ctx.fillText(pi,x,base);x+=ctx.measureText(pi).width+8*S;
+  ctx.font=`500 ${fC*S}px ${F_SERIF}`;ctx.fillText(','+pc,x,L.topo+44*S);
+ },18,4,'rgba(0,0,0,.45)');
+ if(pay){
+  ctx.font=`500 ${19*S}px ${F_SANS}`;ctx.letterSpacing=`${4*S}px`;const tw=ctx.measureText(pay).width,h=42*S,y=base-h;
+  ctx.strokeStyle=EL.ouro;ctx.lineWidth=2;ctx.strokeRect(x+1,y,tw+24*S,h);
+  ctx.fillStyle=EL.ouro;ctx.textBaseline='middle';ctx.fillText(pay,x+14*S,y+h/2+1);ctx.letterSpacing='0px';ctx.textBaseline='alphabetic';
+ }
+ ctx.textAlign='right';
+ dir.slice().reverse().forEach((l,i)=>{
+  const yy=base-12-i*46;
+  if(l.antigo){
+   ctx.font=`400 27px ${F_SANS}`;ctx.fillStyle='rgba(244,239,230,.6)';ctx.fillText(l.t,EL.R,yy);
+   const w=ctx.measureText(l.t).width;ctx.fillRect(EL.R-w,yy-9,w,2);
+  }else{ctx.font=`500 28px ${F_SANS}`;ctx.fillStyle=EL.creme;ctx.fillText(l.t,EL.R,yy)}
+ });
+ ctx.textAlign='left';
+}
+function drawCupomElegante(cp,y){
+ ctx.textBaseline='middle';ctx.textAlign='left';
+ ctx.font=`500 19px ${F_SANS}`;ctx.letterSpacing='4px';const lw=ctx.measureText('CUPOM').width;
+ ctx.font=`700 30px ${F_SANS}`;ctx.letterSpacing='3px';const cw=ctx.measureText(cp).width;
+ const h=62,w=24+lw+20+cw+24;
+ ctx.strokeStyle=EL.ouro;ctx.lineWidth=2;ctx.setLineDash([9,6]);ctx.strokeRect(EL.X+1,y,w,h);ctx.setLineDash([]);
+ ctx.font=`500 19px ${F_SANS}`;ctx.letterSpacing='4px';ctx.fillStyle=EL.ouro;ctx.fillText('CUPOM',EL.X+24,y+h/2+1);
+ ctx.font=`700 30px ${F_SANS}`;ctx.letterSpacing='3px';ctx.fillStyle=EL.creme;ctx.fillText(cp,EL.X+24+lw+20,y+h/2+1);ctx.letterSpacing='0px';
+}
+function drawLinkAbaixo(y){
+ const t='link abaixo';ctx.font=`italic 400 36px ${F_SERIF}`;ctx.textAlign='left';ctx.textBaseline='middle';
+ const tw=ctx.measureText(t).width,seta=20,total=tw+12+seta,x0=540-total/2;
+ ctx.fillStyle='rgba(201,169,110,.5)';ctx.fillRect(EL.X,y,x0-26-EL.X,1.5);ctx.fillRect(x0+total+26,y,EL.R-(x0+total+26),1.5);
+ ctx.fillStyle=EL.ouro;ctx.fillText(t,x0,y-3);
+ const sx=x0+tw+12;ctx.beginPath();ctx.moveTo(sx,y-6);ctx.lineTo(sx+seta,y-6);ctx.lineTo(sx+seta/2,y+6);ctx.closePath();ctx.fill();
+}
+function drawTopElegante(){
+ const y=292,pill=$('pill').value.trim().toUpperCase(),marca=marcaElegante($('brand').value.trim());
+ ctx.textBaseline='middle';ctx.textAlign='left';
+ if(pill){
+  ctx.font=`500 21px ${F_SANS}`;ctx.letterSpacing='4px';const tw=ctx.measureText(pill).width,h=48;
+  ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=1.5;ctx.strokeRect(EL.X,y-h/2,tw+34,h);
+  ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillText(pill,EL.X+17,y+1);ctx.letterSpacing='0px';
+ }
+ let xr=EL.R;ctx.textAlign='right';
+ if(marca){ctx.font=`italic 400 54px ${F_SERIF}`;ctx.fillStyle='rgba(244,239,230,.9)';shadowed(()=>ctx.fillText(marca,xr,y),10,2,'rgba(0,0,0,.35)');xr-=ctx.measureText(marca).width+14}
+ if(logoImg){const h=64,w=logoImg.width*h/logoImg.height;ctx.drawImage(logoImg,xr-w,y-h/2,w,h)}
+ ctx.textAlign='left';
+}
+function drawElegante(){
+ const W=1080,H=1920;ctx.clearRect(0,0,W,H);
+ if(bgImg&&bgIntegrated)fitWidth(bgImg,W,H);else if(bgImg)cover(bgImg,0,0,W,H);else{let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#ebe4d8');g.addColorStop(.6,'#d2c7b6');g.addColorStop(1,'#8e816e');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}
+ // Véu suave no topo e degradê escuro embaixo, onde ficam o título e o preço
+ let topo=ctx.createLinearGradient(0,0,0,H*.24);topo.addColorStop(0,'rgba(20,16,12,.42)');topo.addColorStop(1,'rgba(20,16,12,0)');ctx.fillStyle=topo;ctx.fillRect(0,0,W,H*.24);
+ let fundo=ctx.createLinearGradient(0,H*.55,0,H);fundo.addColorStop(0,'rgba(18,14,10,0)');fundo.addColorStop(.38,'rgba(18,14,10,.74)');fundo.addColorStop(1,'rgba(14,11,8,.95)');ctx.fillStyle=fundo;ctx.fillRect(0,H*.55,W,H*.45);
+ // Layout de baixo para cima: "link abaixo", cupom, preço e título
+ const cp=$('coupon').value.trim().toUpperCase().replace(/\s+/g,'');
+ let y=EL.linkY-46;const cupomY=cp?y-62:0;if(cp)y-=62+34;
+ const L=layoutPrecoElegante(y);
+ const title=$('title').value.trim()||'Nome do produto',maxW=EL.R-EL.X;
+ let fs=50,tl=linesFor(title,maxW,`400 ${fs}px ${F_SERIF}`);
+ if(tl.length>2){fs=44;tl=linesFor(title,maxW,`400 ${fs}px ${F_SERIF}`)}
+ if(tl.length>2){tl=tl.slice(0,2);let l=tl[1];while(l&&ctx.measureText(l+'…').width>maxW)l=l.slice(0,-1);tl[1]=l.trimEnd()+'…'}
+ const traco=L.topo-40,tituloBase=traco-26-(tl.length-1)*fs*1.18,tituloTopo=tituloBase-fs*.78;
+ // Produto entre o topo e o título
+ const pH=tituloTopo-36-EL.pTop;
+ if(bgIntegrated){/* o produto já faz parte da foto gerada pela IA */}
+ else if(productImg)contain(productImg,90,EL.pTop,900,pH,PRODUCT_BASE*Number($('zoom').value)/100,Number($('ypos').value));
+ else{round(100,EL.pTop+40,880,pH-80,26,'rgba(255,255,255,.22)');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.font='bold 35px Arial';ctx.fillText('ADICIONE A FOTO DO PRODUTO',540,EL.pTop+pH/2)}
+ drawTopElegante();
+ ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.font=`400 ${fs}px ${F_SERIF}`;ctx.fillStyle=EL.creme;
+ shadowed(()=>tl.forEach((t,i)=>ctx.fillText(t,EL.X,tituloBase+i*fs*1.18)),12,2,'rgba(0,0,0,.45)');
+ ctx.fillStyle=EL.ouro;ctx.fillRect(EL.X,traco,92,3);
+ drawPrecoElegante(L);
+ if(cp)drawCupomElegante(cp,cupomY);
+ drawLinkAbaixo(EL.linkY);
+ if($('disclaimer').value){ctx.save();ctx.translate(26,960);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`400 16px ${F_SANS}`;ctx.letterSpacing='4px';ctx.fillStyle='rgba(255,255,255,.42)';ctx.fillText('PREÇOS E CUPONS SUJEITOS A ALTERAÇÃO',0,0);ctx.restore();ctx.letterSpacing='0px'}
+ ctx.textBaseline='middle';ctx.textAlign='left';
 }
 
 function brandFamily(){const [w,n]=($('brandFont').value||'400|Anton').split('|');return {w,f:`'${n}',Impact,sans-serif`}}
@@ -570,7 +678,7 @@ async function applyOffer(d){
  if(d.url&&!$('link').value.trim()){$('link').value=d.url;lastPulled=d.url}
  const sc=detectScene((d.category||'')+' '+(d.title||''));if(sc)$('category').value=sc;
  shuffleWord(); // cada oferta nova ganha outra palavra na etiqueta (quando estiver em "Alternar sozinho")
- $('zoom').value=100;$('ypos').value=0;$('zoomVal').textContent='100%';$('yVal').textContent='0';
+ $('cardPrice').value='';$('zoom').value=100;$('ypos').value=0;$('zoomVal').textContent='100%';$('yVal').textContent='0';
  draw();status('Oferta recebida: '+(d.title||'produto')+'.');
  bgImg=null;bgIntegrated=false;draw();
  if(d.image)await fotoDoServidor(d.image).then(loadImgUrl).then(setProduct).catch(()=>status('Não consegui baixar a foto do produto. Envie a foto manualmente.',true));
@@ -612,7 +720,7 @@ $('download').onclick=async()=>{
 $('copyLink').onclick=async()=>{let v=$('link').value.trim();if(!v){status('Cole primeiro seu link de afiliado.',true);return}try{await navigator.clipboard.writeText(v);status('Link de afiliado copiado.')}catch(e){$('link').select();status('Selecione e copie o link manualmente.')}};
 $('copyPrompt').onclick=async()=>{let s=SCENES[$('category').value]||SCENES.sala,extra=$('extra').value.trim();let prompt=`Crie uma fotografia publicitária vertical 9:16 de um cenário realista ${s.pt}. O produto principal será inserido depois na composição, então deixe o centro da cena livre e com superfície adequada. ${extra?extra+'. ':''}Iluminação natural suave, estética de fotografia profissional de e-commerce, ambiente elegante e organizado, sem textos, sem logotipos, sem produtos inventados e sem marcas d’água.`;try{await navigator.clipboard.writeText(prompt);status('Descrição do cenário copiada. Cole em seu gerador de imagens.')}catch(e){status(prompt)}};
 $('save').onclick=()=>{let data={};fields.forEach(id=>data[id]=$(id).value);try{localStorage.setItem('larAchadinhosSettings',JSON.stringify(data));status('Dados salvos neste navegador.')}catch(e){status('Não foi possível salvar neste navegador.',true)}};
-$('reset').onclick=()=>{if(!confirm('Limpar os campos e as imagens desta oferta?'))return;const def={campaign:'',tagWord:'auto',brand:'LAR DE ACHADINHOS',brandFont:'400|Anton',brandColor:'#ffc61a',brandSize:46,pill:'PARCERIA PAGA',disclaimer:'1',zoom:100,ypos:0};['title','price','old','coupon','link','extra','campaign','tagWord','brand','brandFont','brandColor','brandSize','pill','disclaimer','zoom','ypos'].forEach(id=>$(id).value=def[id]??'');$('zoomVal').textContent='100%';$('yVal').textContent='0';bgJob++;busy(false);$('genBg').disabled=false;productSrc=productImg=bgImg=null;productCut=false;bgIntegrated=false;$('product').value='';$('background').value='';loadBrandFont();status('Campos limpos.')};
+$('reset').onclick=()=>{if(!confirm('Limpar os campos e as imagens desta oferta?'))return;const def={campaign:'',tagWord:'auto',brand:'LAR DE ACHADINHOS',brandFont:'400|Anton',brandColor:'#ffc61a',brandSize:46,pill:'PARCERIA PAGA',disclaimer:'1',zoom:100,ypos:0};['title','price','old','cardPrice','coupon','link','extra','campaign','tagWord','brand','brandFont','brandColor','brandSize','pill','disclaimer','zoom','ypos'].forEach(id=>$(id).value=def[id]??'');$('zoomVal').textContent='100%';$('yVal').textContent='0';bgJob++;busy(false);$('genBg').disabled=false;productSrc=productImg=bgImg=null;productCut=false;bgIntegrated=false;$('product').value='';$('background').value='';loadBrandFont();status('Campos limpos.')};
 
 try{let saved=JSON.parse(localStorage.getItem('larAchadinhosSettings')||'null');if(saved){fields.forEach(id=>{if(saved[id]!==undefined)$(id).value=saved[id]})}}catch(e){}
 if($('category').selectedIndex<0)$('category').value='cozinha';
@@ -622,6 +730,11 @@ if($('tagWord').selectedIndex<0)$('tagWord').value='auto';
 $('shuffle').onclick=()=>{if($('tagWord').value!=='auto')$('tagWord').value='auto';shuffleWord();draw()};
 // As fontes da arte vêm do Google Fonts: redesenha quando terminarem de carregar.
 Promise.all([document.fonts.load(`80px ${F_COND}`),document.fonts.load(`800 40px ${F_TITLE}`),document.fonts.load(`700 34px ${F_MONO}`),document.fonts.load(`400 34px ${F_MONO}`)]).then(draw).catch(()=>{});
+function carregarFontesElegante(){
+ Promise.all([document.fonts.load(`500 128px ${F_SERIF}`),document.fonts.load(`400 50px ${F_SERIF}`),document.fonts.load(`italic 400 54px ${F_SERIF}`),
+  document.fonts.load(`500 28px ${F_SANS}`),document.fonts.load(`400 27px ${F_SANS}`)]).then(draw).catch(()=>{});
+}
+$('modelo').addEventListener('change',carregarFontesElegante);setTimeout(carregarFontesElegante,0);
 function loadBrandFont(){const b=brandFamily();$('brandSizeVal').textContent=$('brandSize').value;document.fonts.load(`${b.w} 46px ${b.f}`).then(draw).catch(()=>{})}
 $('brandFont').addEventListener('change',loadBrandFont);setTimeout(loadBrandFont,0);
 // Logo da marca: guardado neste navegador

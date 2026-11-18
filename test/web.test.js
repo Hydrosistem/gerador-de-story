@@ -84,3 +84,24 @@ test('logo do Story: SVG no topo e na aba, ícones PNG com versão para atualiza
   const m = JSON.parse(web('manifest.json'));
   for (const i of m.icons) assert.match(i.src, /^icon-(192|512)\.png\?v=2$/);
 });
+
+test('seletor de modelo: Impacto (atual) e Elegante', () => {
+  assert.match(html, /<select id="modelo"><option value="impacto">[^<]+<\/option><option value="elegante">[^<]+<\/option><\/select>/);
+  assert.match(html, /const fields=\[[^\]]*'modelo'/);
+  assert.match(html, /const fields=\[[^\]]*'cardPrice'/);
+});
+
+test('campo opcional de preço no cartão', () => {
+  assert.match(html, /<input id="cardPrice"[^>]*inputmode="decimal"/);
+});
+
+test('modelo Elegante usa a fonte Bodoni Moda e só ele muda o desenho', () => {
+  assert.match(html, /family=Bodoni\+Moda/);
+  assert.match(html, /function drawElegante\(\)/);
+  assert.match(html, /function draw\(\)\{\n if\(\$\('modelo'\)\.value==='elegante'\)\{drawElegante\(\);return\}/);
+});
+
+// Pedir outros pesos da Inter faz o Google mandar outro arquivo da fonte e muda a arte do modelo Impacto.
+test('Inter continua só no peso 800 (protege a arte do modelo Impacto)', () => {
+  assert.match(html, /family=Inter:wght@800&/);
+});
