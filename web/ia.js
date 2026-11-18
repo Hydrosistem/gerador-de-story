@@ -161,7 +161,10 @@ async function gerarImagem(pedido, quem) {
     }
     if (r.ok) return await lerImagem(r, quem);
     ultimo = await r.text().catch(function () { return ''; });
-    if (r.status === 401 || r.status === 403) throw new Error(quem + ' recusou a chave (confira a chave nas Configurações da IA).');
+    if (r.status === 401 || r.status === 403) {
+      var motivo = iaMensagemErro_(quem, ultimo, r.status).slice(quem.length + 2);
+      throw new Error(quem + ' recusou a chave: ' + motivo + ' Ela pode ter sido apagada ou trocada: cole uma chave nova nas Configurações da IA.');
+    }
     if (r.status !== 402 && r.status !== 429 && r.status < 500) throw new Error(iaMensagemErro_(quem, ultimo, r.status));
     var espera = segundosRetry(ultimo) || 10;
     if (tentativa === IA_TENTATIVAS_ - 1 || espera > 60) break;

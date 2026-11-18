@@ -132,6 +132,7 @@ test('info de página normal de produto devolve campos e urlFinal', () => {
     titulo: 'Fone Bluetooth X',
     preco: 149.9,
     precoAntigo: null,
+    precoCartao: null,
     imagem: 'https://http2.mlstatic.com/D_NQ_NP_777-F.webp',
     categoria: '',
     urlFinal: 'https://www.mercadolivre.com.br/p/MLB1',
@@ -253,6 +254,7 @@ test('info segue 301 até /social/ e lê o polycard', () => {
     titulo: 'Boné Ogochi Básico Algodão',
     preco: 39.9,
     precoAntigo: 67,
+    precoCartao: null,
     imagem: 'https://http2.mlstatic.com/D_NQ_NP_2X_123456-MLA0000000000_012025-F.webp',
     categoria: 'HATS AND CAPS',
     urlFinal: SOCIAL,
@@ -332,4 +334,17 @@ test('info com título mas sem preço não fica no cache', () => {
   const b = amb.chamar(info(sessao, 'https://www.mercadolivre.com.br/p/MLB1'));
   assert.equal(b.preco, 149.9);
   assert.equal(amb.stubs.chamadas.fetch, 2);
+});
+
+test('info devolve o preço no cartão quando a página tem', () => {
+  const amb = ambiente({
+    respostas: [
+      { code: 301, headers: { Location: SOCIAL } },
+      { code: 200, body: fx('social-cartao-pix.html') },
+    ],
+  });
+  const sessao = logado(amb);
+  const r = amb.chamar(info(sessao, 'https://meli.la/pix'));
+  assert.equal(r.preco, 167.5);
+  assert.equal(r.precoCartao, 176.32);
 });

@@ -16,6 +16,7 @@ test('parseSocial lê polycard com desconto', () => {
     titulo: 'Boné Ogochi Básico Algodão',
     preco: 39.9,
     precoAntigo: 67,
+    precoCartao: null,
     imagem: FOTO,
     categoria: 'HATS AND CAPS',
     itemId: 'MLB6645312468',
@@ -39,6 +40,7 @@ test('parseSocial sem polycard usa og:title e og:image', () => {
     titulo: 'Boné Ogochi Básico',
     preco: 39.9,
     precoAntigo: null,
+    precoCartao: null,
     imagem: 'https://http2.mlstatic.com/D_NQ_NP_123456-MLA0000000000_012025-F.webp',
     categoria: '',
     itemId: null,
@@ -99,6 +101,7 @@ test('parseSocial sem polycard lê o cartão em destaque', () => {
     titulo: 'Boné Ogochi Básico Algodão',
     preco: 39.9,
     precoAntigo: 67,
+    precoCartao: null,
     imagem: FOTO_CARTAO,
     categoria: '',
     itemId: 'MLB6645312468',
@@ -130,4 +133,29 @@ test('sem destaque e sem cartão do produto, não usa o cartão de outro produto
   assert.equal(r.preco, 39.9);
   assert.equal(r.precoAntigo, null);
   assert.equal(r.itemId, null);
+});
+
+// ---- preço no cartão (quando o ML mostra "X% OFF no Pix" e "ou R$ … em Nx") ----
+
+test('parseSocial pelos dados traz o preço no Pix e o total no cartão', () => {
+  const r = plain(ctx.parseSocial(fx('social-pix.html')));
+  assert.equal(r.preco, 167.5);
+  assert.equal(r.precoAntigo, 199.9);
+  assert.equal(r.precoCartao, 176.32);
+});
+
+test('parseSocial pelo cartão visível traz o total no cartão', () => {
+  const r = plain(ctx.parseSocial(fx('social-cartao-pix.html')));
+  assert.equal(r.preco, 167.5);
+  assert.equal(r.precoCartao, 176.32);
+});
+
+test('sem "ou R$ … no cartão", precoCartao é null', () => {
+  assert.equal(ctx.parseSocial(fx('social-com-desconto.html')).precoCartao, null);
+  assert.equal(ctx.parseSocial(fx('social-cartao.html')).precoCartao, null);
+});
+
+test('total no cartão igual ao preço não conta como preço no cartão', () => {
+  const html = fx('social-pix.html').replace('"value":176.32', '"value":167.5');
+  assert.equal(ctx.parseSocial(html).precoCartao, null);
 });

@@ -15,7 +15,7 @@ test('página não chama mais rotas /api/ do servidor local', () => {
 });
 
 test('página carrega ia.js e o script do Google', () => {
-  assert.match(html, /<script src="ia\.js"><\/script>/);
+  assert.match(html, /<script src="ia\.js(\?v=\d+)?"><\/script>/);
   assert.match(html, /<script id="scriptGoogle" src="https:\/\/accounts\.google\.com\/gsi\/client" async/);
 });
 
@@ -104,4 +104,13 @@ test('modelo Elegante usa a fonte Bodoni Moda e só ele muda o desenho', () => {
 // Pedir outros pesos da Inter faz o Google mandar outro arquivo da fonte e muda a arte do modelo Impacto.
 test('Inter continua só no peso 800 (protege a arte do modelo Impacto)', () => {
   assert.match(html, /family=Inter:wght@800&/);
+});
+
+test('preço no cartão puxado do link vai para o campo', () => {
+  assert.match(html, /card:r\.precoCartao/);
+  assert.match(html, /\$\('cardPrice'\)\.value=Number\(d\.card\)>0\?fmt\(Number\(d\.card\)\):''/);
+});
+
+test('chave recusada abre as Configurações da IA', () => {
+  assert.match(html, /if\(!cfg\.key\|\|\/recusou a chave\/\.test\(e\.message\|\|''\)\)\$\('cfg'\)\.open=true/);
 });

@@ -201,13 +201,26 @@ function cartaoSocial_(html) {
   var agora = (/aria-label="Agora:\s*([^"]*)"/.exec(bloco) || [])[1];
   var foto = (/class="poly-component__picture"[^>]*?\s(?:data-src|src)="(https:\/\/[^"]*mlstatic\.com\/[^"]+)"/.exec(bloco) || [])[1];
   var id = (/[?&#;]wid=(ML[A-Z]\d+)/.exec(bloco) || /item_id%3A(ML[A-Z]\d+)/.exec(bloco) || [])[1];
+  // "ou R$ 176,32 em 5x sem juros": total no cartão (aparece quando o preço principal é o do Pix).
+  var p = bloco.indexOf('poly-price__installments');
+  var parcelas = p >= 0 ? (/aria-label="([^"]*reais[^"]*)"/.exec(bloco.substr(p, 1500)) || [])[1] : null;
   return {
     titulo: titulo ? decodificarEntidades_(titulo).trim() : null,
     preco: valorRotulo_(agora),
     precoAntigo: valorRotulo_(antes),
+    precoCartao: valorRotulo_(parcelas),
     imagem: foto ? foto.replace('/D_Q_NP_', '/D_NQ_NP_').replace(/-[A-Z]{1,2}\.(webp|jpg|png)$/i, '-F.$1') : null,
     itemId: id || null
   };
+}
+
+// Total no cartão nos dados do polycard: installments.values com key "price_total".
+function totalNoCartao_(precoComp) {
+  var valores = (precoComp && precoComp.installments && precoComp.installments.values) || [];
+  for (var i = 0; i < valores.length; i++) {
+    if (valores[i] && valores[i].key === 'price_total') return Number(valores[i].price && valores[i].price.value) || 0;
+  }
+  return 0;
 }
 
 // Página "social" do afiliado (para onde o link meli.la leva): o produto compartilhado vem num
@@ -237,6 +250,7 @@ function parseSocial(html) {
   var antigo = Number(precoComp.previous_price && precoComp.previous_price.value) || cartao.precoAntigo || 0;
   var fotoId = card && card.pictures && card.pictures.pictures && card.pictures.pictures[0] && card.pictures.pictures[0].id;
   var imagem = fotoId ? 'https://http2.mlstatic.com/D_NQ_NP_2X_' + fotoId + '-F.webp' : cartao.imagem || '';
+  var noCartao = totalNoCartao_(precoComp) || cartao.precoCartao || 0;
 
   var ogTitulo = metaContent_(html, 'property', 'og:title');
   ogTitulo = ogTitulo === null ? '' : decodificarEntidades_(ogTitulo);
@@ -255,6 +269,7 @@ function parseSocial(html) {
     titulo: titulo || null,
     preco: preco || null,
     precoAntigo: antigo > preco ? antigo : null,
+    precoCartao: noCartao > preco && preco > 0 ? noCartao : null,
     imagem: imagem || null,
     categoria: (dominio || '').replace(/_/g, ' '),
     itemId: itemId

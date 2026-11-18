@@ -193,3 +193,12 @@ test('gerarImagem que demora demais avisa para tentar de novo', async () => {
   const { ctx } = ambiente([{ abort: true }]);
   await assert.rejects(ctx.gerarImagem({ url: 'https://api.openai.com/x', init: {} }, 'OpenAI'), /A IA demorou demais para responder\. Tente de novo\./);
 });
+
+test('chave recusada mostra o motivo do serviço e diz para colar uma nova', async () => {
+  const corpo = '{"success":false,"error":{"message":"A valid API key is required.","code":"UNAUTHORIZED"}}';
+  const { ctx } = ambiente([{ status: 401, headers: { 'Content-Type': 'application/json' }, body: corpo }]);
+  await assert.rejects(
+    ctx.gerarImagem({ url: 'https://gen.pollinations.ai/image/x', init: {} }, 'Pollinations'),
+    /Pollinations recusou a chave: A valid API key is required\..*cole uma chave nova/,
+  );
+});

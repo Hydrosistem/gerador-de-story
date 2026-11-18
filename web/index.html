@@ -226,7 +226,7 @@ details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[op
  <div class="previewfoot">Evite informações essenciais muito próximas das bordas superior e inferior.</div>
 </section>
 </main>
-<script src="ia.js"></script>
+<script src="ia.js?v=2"></script>
 <script id="scriptGoogle" src="https://accounts.google.com/gsi/client" async onerror="window.__gsiFalhou = true"></script>
 <script>
 // ---------- Conta (login com Google) e servidor (Apps Script) ----------
@@ -658,7 +658,7 @@ async function generateBackground(){
   status(fallback?'Cenário gerado com o produto recortado por cima. Para a IA colocar o produto DENTRO do cenário, adicione uma chave grátis do Pollinations (ou Gemini/OpenAI) em “Configurações da IA”.'
    :integrate?'Pronto! Produto dentro do cenário. Clique de novo para outra versão.':'Cenário gerado! Clique de novo para outra versão.',fallback);
   if(fallback)$('cfg').open=true;
- }catch(e){if(job===bgJob){status(e.message||'Falha ao gerar o cenário.',true);if(!cfg.key)$('cfg').open=true}}
+ }catch(e){if(job===bgJob){status(e.message||'Falha ao gerar o cenário.',true);if(!cfg.key||/recusou a chave/.test(e.message||''))$('cfg').open=true}}
  finally{if(job===bgJob){busy(false);$('genBg').disabled=false}}
 }
 function modeHint(){$('modeHint').textContent=$('mode').value==='integrar'
@@ -678,7 +678,7 @@ async function applyOffer(d){
  if(d.url&&!$('link').value.trim()){$('link').value=d.url;lastPulled=d.url}
  const sc=detectScene((d.category||'')+' '+(d.title||''));if(sc)$('category').value=sc;
  shuffleWord(); // cada oferta nova ganha outra palavra na etiqueta (quando estiver em "Alternar sozinho")
- $('cardPrice').value='';$('zoom').value=100;$('ypos').value=0;$('zoomVal').textContent='100%';$('yVal').textContent='0';
+ $('cardPrice').value=Number(d.card)>0?fmt(Number(d.card)):'';$('zoom').value=100;$('ypos').value=0;$('zoomVal').textContent='100%';$('yVal').textContent='0';
  draw();status('Oferta recebida: '+(d.title||'produto')+'.');
  bgImg=null;bgIntegrated=false;draw();
  if(d.image)await fotoDoServidor(d.image).then(loadImgUrl).then(setProduct).catch(()=>status('Não consegui baixar a foto do produto. Envie a foto manualmente.',true));
@@ -694,7 +694,7 @@ async function pullFromLink(){
   const r=await api({action:'info',url:link});
   if(job!==pulling)return;
   if(!r.ok)throw new Error(MSG_INFO[r.erro]||'Não consegui puxar os dados. Tente de novo.');
-  busy(false);await applyOffer({title:r.titulo,price:r.preco,old:r.precoAntigo,image:r.imagem,category:r.categoria});
+  busy(false);await applyOffer({title:r.titulo,price:r.preco,old:r.precoAntigo,image:r.imagem,category:r.categoria,card:r.precoCartao});
   if(!r.preco)status('Não achei o preço nesse link. Digite o preço antes de publicar.',true);
  }catch(e){if(job===pulling){busy(false);status(e.message,true)}}
  finally{if(job===pulling)$('pull').disabled=false}

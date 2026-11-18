@@ -130,7 +130,7 @@ function buscarInfo_(url) {
   var d = paginaSocial_(pagina.urlFinal) ? parseSocial(html) : null;
   if (!d) {
     var p = parseProduto(html);
-    d = { titulo: p.titulo, preco: p.preco, precoAntigo: p.precoAntigo, imagem: p.imagem, categoria: '' };
+    d = { titulo: p.titulo, preco: p.preco, precoAntigo: p.precoAntigo, precoCartao: null, imagem: p.imagem, categoria: '' };
   }
   if (d.titulo === null && d.preco === null) return { ok: false, erro: 'link_curto' };
 
@@ -139,6 +139,7 @@ function buscarInfo_(url) {
     titulo: d.titulo,
     preco: d.preco,
     precoAntigo: d.precoAntigo,
+    precoCartao: d.precoCartao || null,
     imagem: d.imagem,
     categoria: d.categoria || '',
     urlFinal: pagina.urlFinal
