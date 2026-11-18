@@ -76,3 +76,11 @@ test('topo verde com ícone, nome do app e barra de ícones', () => {
   assert.match(html, /<meta name="theme-color" content="#128c7e">/);
   assert.equal(JSON.parse(web('manifest.json')).theme_color, '#128c7e');
 });
+
+test('logo do Story: SVG no topo e na aba, ícones PNG com versão para atualizar o app instalado', () => {
+  assert.ok(existe('logo.svg'), 'web/logo.svg não existe');
+  assert.match(html, /<img src="logo\.svg"/);
+  assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="logo\.svg">/);
+  const m = JSON.parse(web('manifest.json'));
+  for (const i of m.icons) assert.match(i.src, /^icon-(192|512)\.png\?v=2$/);
+});
