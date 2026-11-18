@@ -6,12 +6,6 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8765", "--directory", "web"],
       "port": 8765
-    },
-    {
-      "name": "gerador",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["server.js", "--no-open"],
-      "port": 3333
     }
   ]
 }

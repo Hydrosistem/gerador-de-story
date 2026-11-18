@@ -44,6 +44,30 @@ clasp update-deployment <id da implantação> --description "o que mudou"
 
 O id da implantação aparece em `clasp list-deployments` (a linha com "Gerador de Story", não a `@HEAD`).
 
+### 3. Site (Cloudflare Pages)
+1. Em `web/index.html`, confira `API_URL` (a URL `/exec` do passo 2) e `GOOGLE_CLIENT_ID` (o Client ID do passo 1). Os dois são públicos.
+2. Envie o repositório ao GitHub.
+3. No Cloudflare: Workers & Pages → Create → "Continue to Pages" → Import an existing Git repository. Branch `main`, preset `None`, build command `node --test`, output directory `web`, nome do projeto `gerador-de-story`.
+4. Cada push na `main` roda os testes e publica a pasta `web/` em https://gerador-de-story.pages.dev. **Push na main = produção.**
+5. Se o nome `gerador-de-story` estiver ocupado e o endereço sair diferente, adicione o endereço novo em "Origens JavaScript autorizadas" do cliente OAuth (passo 1).
+
+### 4. Publicar o login do Google
+Enquanto a tela de login estiver "Em teste", só entra quem está em **Usuários de teste** (Google Auth Platform → Público). Para liberar de vez:
+1. Google Auth Platform → **Branding**: página inicial `https://gerador-de-story.pages.dev`, política de privacidade `https://gerador-de-story.pages.dev/privacidade.html`, domínio autorizado `gerador-de-story.pages.dev`.
+2. Google Auth Platform → **Público** → **Publicar app** → Confirmar.
+
+### 5. Celular
+Abra https://gerador-de-story.pages.dev no Chrome, toque em "Entrar com Google" e depois em "Instalar app" (menu ⋮ → Instalar app / Adicionar à tela inicial).
+
+### Chave da IA do cenário
+Cada aparelho precisa da chave colada uma vez em ⚙️ "Configurações da IA de cenário". Ela fica só naquele aparelho e vai direto do navegador para a IA.
+- **Pollinations:** chave grátis em enter.pollinations.ai (Keys → Secret key). Sem chave ele não funciona pelo navegador (pede uma verificação anti-robô).
+- **Gemini:** chave em aistudio.google.com/apikey.
+- **OpenAI:** chave em platform.openai.com.
+
+## Testar no computador
+Rode `python -m http.server 8765 --directory web` e abra http://localhost:8765 (essa origem está autorizada no login do Google).
+
 ## Clientes
 - **Liberar alguém:** nova linha na aba `Clientes` com o e-mail (minúsculas), o nome e `sim` em `ativo`.
 - **Bloquear:** troque `ativo` para `não`. O acesso cai no próximo pedido.
