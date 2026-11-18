@@ -320,3 +320,16 @@ test('diagnosticarLink mostra o tamanho e os marcadores da página, sem usar o c
   assert.match(saida, /"urlFinal":"https:\/\/www\.mercadolivre\.com\.br\/social\/loja\?ref=x"/);
   assert.equal(amb.stubs.chamadas.cachePut.length, 0);
 });
+
+test('info com título mas sem preço não fica no cache', () => {
+  const semPreco = '<html><head><meta property="og:title" content="Boné Ogochi"></head><body></body></html>';
+  const amb = ambiente({ respostas: [{ code: 200, body: semPreco }, { code: 200, body: fx('produto-og.html') }] });
+  const sessao = logado(amb);
+  const a = amb.chamar(info(sessao, 'https://www.mercadolivre.com.br/p/MLB1'));
+  assert.equal(a.ok, true);
+  assert.equal(a.preco, null);
+  assert.equal(amb.stubs.chamadas.cachePut.length, 0);
+  const b = amb.chamar(info(sessao, 'https://www.mercadolivre.com.br/p/MLB1'));
+  assert.equal(b.preco, 149.9);
+  assert.equal(amb.stubs.chamadas.fetch, 2);
+});

@@ -116,3 +116,18 @@ test('parseSocial pelo cartão lê preços com milhar', () => {
   assert.equal(r.preco, 1299.9);
   assert.equal(r.precoAntigo, 2499);
 });
+
+test('sem cartão em destaque, escolhe o cartão com o mesmo título do og:title', () => {
+  const r = plain(ctx.parseSocial(fx('social-cartao-sem-destaque.html')));
+  assert.equal(r.titulo, 'Boné Ogochi Básico Algodão');
+  assert.equal(r.precoAntigo, 67);
+  assert.equal(r.itemId, 'MLB6645312468');
+});
+
+test('sem destaque e sem cartão do produto, não usa o cartão de outro produto', () => {
+  const r = plain(ctx.parseSocial(fx('social-cartao-outro-produto.html')));
+  assert.equal(r.titulo, 'Boné Ogochi Básico Algodão');
+  assert.equal(r.preco, 39.9);
+  assert.equal(r.precoAntigo, null);
+  assert.equal(r.itemId, null);
+});

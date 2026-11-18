@@ -143,7 +143,8 @@ function buscarInfo_(url) {
     categoria: d.categoria || '',
     urlFinal: pagina.urlFinal
   };
-  cache.put(chave, JSON.stringify(out), TTL_CACHE_);
+  // Sem preço provavelmente é uma página incompleta: não guarda, para a próxima tentativa buscar de novo.
+  if (out.preco !== null) cache.put(chave, JSON.stringify(out), TTL_CACHE_);
   return out;
 }
 

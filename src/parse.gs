@@ -172,15 +172,30 @@ function valorRotulo_(rotulo) {
   return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
 }
 
+function normalizarTitulo_(s) {
+  return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
 // Cartão visível do produto compartilhado (classe poly-card, marcado como card-featured).
 // É o que vem na versão "estática" da página social, sem os dados em JSON.
 function cartaoSocial_(html) {
   var blocos = html.split(/class="poly-card[\s"]/).slice(1);
   if (!blocos.length) return null;
-  var bloco = blocos[0];
+  var bloco = null;
   for (var i = 0; i < blocos.length; i++) {
     if (blocos[i].indexOf('/card-featured/') >= 0) { bloco = blocos[i]; break; }
   }
+  // Sem a marca de destaque, só aceita o cartão com o mesmo título do og:title (o produto
+  // compartilhado). Pegar o primeiro cartão poderia trazer outro produto da vitrine.
+  if (!bloco) {
+    var og = metaContent_(html, 'property', 'og:title');
+    var alvo = normalizarTitulo_(og === null ? '' : decodificarEntidades_(og).replace(/\s+-\s+R\$\s*[\d.,]+\s*$/, ''));
+    for (var j = 0; alvo && j < blocos.length; j++) {
+      var t = normalizarTitulo_(decodificarEntidades_((/class="poly-component__title"[^>]*>([^<]+)</.exec(blocos[j]) || [])[1] || ''));
+      if (t && (t === alvo || t.indexOf(alvo) === 0 || alvo.indexOf(t) === 0)) { bloco = blocos[j]; break; }
+    }
+  }
+  if (!bloco) return null;
   var titulo = (/class="poly-component__title"[^>]*>([^<]+)</.exec(bloco) || [])[1];
   var antes = (/aria-label="Antes:\s*([^"]*)"/.exec(bloco) || [])[1];
   var agora = (/aria-label="Agora:\s*([^"]*)"/.exec(bloco) || [])[1];

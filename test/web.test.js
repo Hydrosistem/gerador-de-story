@@ -53,3 +53,11 @@ test('manifest tem nome Gerador de Story e ícones 192 e 512', () => {
   assert.match(html, /<link rel="manifest" href="manifest\.json">/);
   assert.ok(existe('sw.js'), 'web/sw.js não existe');
 });
+
+test('link sem preço avisa para digitar o preço antes de publicar', () => {
+  const ini = html.indexOf('async function pullFromLink');
+  const fim = html.indexOf('\n}', ini);
+  const corpo = html.slice(ini, fim);
+  assert.ok(ini >= 0, 'pullFromLink não encontrado');
+  assert.match(corpo, /if\(!r\.preco\)status\('Não achei o preço nesse link\. Digite o preço antes de publicar\.',true\)/);
+});
