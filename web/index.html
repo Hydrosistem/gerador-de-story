@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gerador de Story</title>
+<meta name="theme-color" content="#111318">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Inter:wght@800&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Montserrat:wght@900&family=Poppins:wght@800&family=Righteous&family=Bangers&family=Lobster&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#17191d;--muted:#68707d;--line:#e4e7ec;--green:#08d66a;--yellow:#ffc400;--orange:#f05a19;--dark:#101114}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{background:#111318;color:#fff;padding:19px max(18px,calc((100% - 1260px)/2));display:flex;align-items:center;justify-content:space-between;gap:14px}
+header h1{font-size:21px;line-height:1.15;margin:0}header p{margin:5px 0 0;color:#b8bdc7;font-size:12px}
+.pill{border:1px solid #3d424c;border-radius:99px;padding:7px 11px;color:#d7fbe6;font-size:11px;white-space:nowrap}
+main{max-width:1260px;margin:0 auto;padding:20px;display:grid;grid-template-columns:minmax(320px,430px) minmax(320px,1fr);gap:20px;align-items:start}
+.panel,.preview{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 25px #1018280a}
+.panel{padding:18px}.preview{padding:18px;position:sticky;top:14px}
+.section{padding-bottom:17px;margin-bottom:17px;border-bottom:1px solid var(--line)}.section:last-of-type{border:0;margin:0 0 6px;padding:0}
+h2{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.num{display:inline-grid;place-items:center;width:23px;height:23px;border-radius:7px;background:#e9f9ef;color:#087c3c;font-size:12px}
+.field{margin:0 0 11px}.field:last-child{margin-bottom:0}label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
+input,select{width:100%;min-width:0;border:1px solid #d7dce3;border-radius:9px;padding:10px 11px;background:#fff;color:#17191d;font:inherit}
+input:focus,select:focus{outline:2px solid #b8f2ce;border-color:#12a45a}
+input[type=file]{padding:7px;font-size:12px}input[type=range]{padding:0;accent-color:#0c9e51}
+input[type=color]{height:42px;padding:4px;cursor:pointer}
+input[type=checkbox]{width:auto;accent-color:#0c9e51;margin:0}
+.check{display:flex;align-items:center;gap:7px;font-weight:600;font-size:12px;margin:0 0 7px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hint{font-size:11px;color:var(--muted);margin:5px 0 0}
+.uploads{display:grid;grid-template-columns:1fr 1fr;gap:10px}.uploadbox{border:1px dashed #cbd1da;border-radius:11px;padding:10px;background:#fafbfc}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
+button{border:0;border-radius:10px;padding:11px 13px;font:700 12px/1.2 inherit;cursor:pointer;transition:.15s}
+button:hover{filter:brightness(.96);transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.primary{background:#111318;color:#fff;width:100%;padding:14px;margin-top:5px}.green{background:#0c9e51;color:#fff}.soft{background:#eef1f5;color:#222}.outline{background:#fff;border:1px solid #d7dce3;color:#252932}
+.ai{background:linear-gradient(135deg,#6d28d9,#db2777);color:#fff}
+.small{font-size:11px;font-weight:600;padding:8px 10px}
+.previewtop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.previewtop h2{margin:0}
+.canvaswrap{position:relative;display:flex;justify-content:center;background:linear-gradient(45deg,#e9ebef 25%,transparent 25%),linear-gradient(-45deg,#e9ebef 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e9ebef 75%),linear-gradient(-45deg,transparent 75%,#e9ebef 75%);background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;padding:12px;border-radius:12px}
+canvas{display:block;width:min(100%,405px);height:auto;aspect-ratio:9/16;border-radius:5px;box-shadow:0 5px 22px #0003;background:#d9d5cc}
+.busy{position:absolute;inset:0;display:none;place-items:center;background:#0008;border-radius:12px;color:#fff;font-weight:700;font-size:13px;text-align:center;white-space:pre-line}
+.busy.on{display:grid}.busy div{display:grid;gap:12px;justify-items:center;padding:20px}
+.spin{width:38px;height:38px;border:4px solid #fff4;border-top-color:#fff;border-radius:50%;animation:sp 0.9s linear infinite}@keyframes sp{to{transform:rotate(1turn)}}
+.previewfoot{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
+.status{min-height:18px;color:#087c3c;font-size:11px;margin-top:8px}.status.err{color:#b42318}
+.tip{padding:10px 11px;background:#fff8df;border:1px solid #f4e5a8;border-radius:10px;font-size:11px;color:#645018;margin-top:12px}
+.linkrow{display:flex;gap:7px}.linkrow input{flex:1}
+.capture{background:linear-gradient(135deg,#fffbe6,#eefcf3);border:1px solid #e7e2b8;border-radius:13px;padding:14px;margin-bottom:17px}
+.capture h2{margin-bottom:8px}
+.steps{margin:0 0 12px;padding-left:19px;font-size:12px;color:#383d46}.steps li{margin-bottom:4px}
+.bmrow{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.bookmarklet{display:inline-flex;align-items:center;gap:6px;background:#ffe600;color:#2d3277;border:2px dashed #2d3277;border-radius:10px;padding:9px 13px;font-weight:800;font-size:13px;text-decoration:none;cursor:grab;white-space:nowrap}
+.bookmarklet:active{cursor:grabbing}.bmrow small{font-size:11px;color:var(--muted);flex:1;min-width:140px}
+details.cfg{border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:14px;background:#fafbfc}
+details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[open] summary{margin-bottom:10px}
+@media(max-width:850px){main{grid-template-columns:1fr;padding:12px}.preview{position:static;order:-1}header{padding:15px 14px}.preview canvas{width:min(78vw,405px)}}
+@media(max-width:420px){.uploads{grid-template-columns:1fr}.grid2{gap:8px}.panel,.preview{padding:13px}}
+[hidden]{display:none!important}
+#telaLogin{min-height:calc(100vh - 90px);display:grid;place-items:center;padding:24px 16px}
+.logincard{max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 25px #1018280a;padding:28px 22px;display:grid;gap:14px;text-align:center}
+.logincard h2{justify-content:center;font-size:22px;margin:0}
+.logincard p{margin:0;color:var(--muted);font-size:14px}
+.logincard .aceite{font-size:11px}.logincard .aceite a{color:var(--muted)}
+#botaoGoogle{display:flex;justify-content:center;min-height:44px}
+#avisoLogin{font-size:13px;color:var(--muted);white-space:pre-line}#avisoLogin:empty{display:none}#avisoLogin.erro{color:#b42318}
+.conta{color:#b8bdc7;font-size:12px;white-space:nowrap}.conta strong{color:#fff}
+@media(max-width:560px){header{flex-wrap:wrap;gap:8px}header .pill{display:none}}
+</style>
+</head>
+<body>
+<header>
+ <div><h1>🏠 Lar de Achadinhos</h1><p>Gerador de artes promocionais · Mercado Livre · Status do WhatsApp</p></div>
+ <div style="display:flex;gap:8px;align-items:center"><span class="pill">STORY 9:16 · 1080 × 1920</span><span id="conta" class="conta" hidden>Olá, <strong id="nomeConta"></strong></span><button class="small" id="logout" type="button" hidden style="background:#2a2e36;color:#fff">Sair</button></div>
+</header>
+<div id="telaLogin" hidden>
+ <div class="logincard">
+  <h2>🏠 Gerador de Story</h2>
+  <p>Cole o link de afiliado do Mercado Livre e receba a arte do Status pronta, com cenário de IA.</p>
+  <div id="avisoLogin" role="status"></div>
+  <div id="botaoGoogle"></div>
+  <p class="aceite">Ao entrar, você concorda com a <a href="privacidade.html">Política de Privacidade</a>.</p>
+ </div>
+</div>
+<main id="app" hidden>
+<section class="panel">
+ <div class="capture">
+  <h2>⚡ Puxar oferta pelo link</h2>
+  <div class="field"><label for="link">Link de afiliado Mercado Livre</label><div class="linkrow"><input id="link" placeholder="Cole o link aqui — os dados vêm sozinhos"><button class="green small" id="pull" type="button">Puxar dados</button><button class="soft small" id="copyLink" type="button">Copiar</button></div><p class="hint">Ao colar, título, preço, foto e cenário são preenchidos automaticamente. O link não aparece na imagem.</p></div>
+  <label class="check"><input type="checkbox" id="autoAI" checked> Gerar cenário com IA automaticamente ao puxar a oferta</label>
+  <label class="check"><input type="checkbox" id="cutBg" checked> Remover fundo branco da foto do produto</label>
+ </div>
+
+ <div class="section">
+  <h2><span class="num">1</span> Dados da oferta</h2>
+  <div class="field"><label for="title">Nome do produto</label><input id="title" value="Camiseta básica masculina" maxlength="120"></div>
+  <div class="grid2">
+   <div class="field"><label for="price">Preço promocional (R$)</label><input id="price" value="89,90" inputmode="decimal"></div>
+   <div class="field"><label for="old">Preço anterior (R$)</label><input id="old" value="139,90" inputmode="decimal"></div>
+  </div>
+  <div class="grid2">
+   <div class="field"><label for="campaign">Antes da palavra (opcional)</label><input id="campaign" value="" maxlength="14" placeholder="Ex.: 11.11, BLACK"></div>
+   <div class="field"><label for="tagWord">Palavra da etiqueta</label><div class="linkrow"><select id="tagWord"><option value="auto">Alternar sozinho</option><option>IMPERDÍVEL</option><option>ACHADINHO</option><option>OFERTA</option></select><button class="soft small" id="shuffle" type="button" title="Trocar a palavra">🔀</button></div></div>
+  </div>
+  <div class="grid2">
+   <div class="field"><label for="payment">Condição</label><select id="payment"><option value="no Pix">no Pix</option><option value="à vista">à vista</option><option value="no cartão">no cartão</option><option value="">sem condição</option></select></div>
+   <div class="field"><label for="coupon">Cupom (opcional)</label><input id="coupon" placeholder="Ex.: PARAVOCEDEZ" maxlength="20"></div>
+  </div>
+ </div>
+
+ <div class="section">
+  <h2><span class="num">2</span> Produto e cenário</h2>
+  <div class="uploads">
+   <div class="uploadbox field"><label for="product">Foto do produto</label><input id="product" type="file" accept="image/*"><p class="hint">Vem sozinha ao puxar a oferta. Fundo branco é removido.</p></div>
+   <div class="uploadbox field"><label for="background">Foto do ambiente</label><input id="background" type="file" accept="image/*"><p class="hint">Opcional: use sua própria foto no lugar da IA.</p></div>
+  </div>
+  <div class="field"><label for="mode">Como montar a foto</label><select id="mode">
+   <option value="integrar">Produto dentro do cenário (a IA monta a cena com o produto)</option>
+   <option value="recorte">Produto recortado por cima do cenário</option>
+  </select><p class="hint" id="modeHint"></p></div>
+  <div class="field"><label for="category">Cenário</label><select id="category"></select><p class="hint">Escolhido sozinho pela categoria do produto. Você pode trocar.</p></div>
+  <div class="field"><label for="extra">Detalhe extra do cenário (opcional)</label><input id="extra" placeholder="Ex.: tons de verde, clima de Natal, luz de fim de tarde" maxlength="160"></div>
+  <div class="actions" style="margin-bottom:12px"><button class="ai" id="genBg" type="button">✨ Gerar cenário com IA</button><button class="outline small" id="copyPrompt" type="button">Copiar descrição</button></div>
+  <div class="grid2">
+   <div class="field"><label for="zoom">Tamanho do produto <output id="zoomVal">100%</output></label><input id="zoom" type="range" min="55" max="145" value="100"></div>
+   <div class="field"><label for="ypos">Altura do produto <output id="yVal">0</output></label><input id="ypos" type="range" min="-180" max="180" value="0"></div>
+  </div>
+ </div>
+
+ <div class="section">
+  <h2><span class="num">3</span> Identidade da arte</h2>
+  <div class="grid2">
+   <div class="field"><label for="brand">Marca no topo</label><input id="brand" value="LAR DE ACHADINHOS" placeholder="Vazio = sem marca" maxlength="28"></div>
+   <div class="field"><label for="pill">Selo do canto</label><input id="pill" value="PARCERIA PAGA" maxlength="22" placeholder="Vazio = sem selo"></div>
+  </div>
+  <div class="grid2">
+   <div class="field"><label for="brandFont">Fonte da marca</label><select id="brandFont">
+    <option value="400|Anton">Anton (alta e estreita)</option>
+    <option value="400|Bebas Neue">Bebas Neue (fina e alta)</option>
+    <option value="400|Archivo Black">Archivo Black (larga)</option>
+    <option value="900|Montserrat">Montserrat (moderna)</option>
+    <option value="800|Poppins">Poppins (arredondada)</option>
+    <option value="400|Righteous">Righteous (divertida)</option>
+    <option value="400|Bangers">Bangers (gibi)</option>
+    <option value="400|Lobster">Lobster (cursiva, como digitado)</option>
+    <option value="400|Pacifico">Pacifico (manuscrita, como digitado)</option>
+   </select></div>
+   <div class="field"><label for="brandColor">Cor da marca</label><input id="brandColor" type="color" value="#ffc61a"></div>
+  </div>
+  <div class="field"><label for="brandSize">Tamanho da marca <output id="brandSizeVal">46</output></label><input id="brandSize" type="range" min="28" max="80" value="46"></div>
+  <div class="field"><label for="logo">Logo (opcional)</label><div class="linkrow"><input id="logo" type="file" accept="image/*"><button class="soft small" id="logoDel" type="button">Remover</button></div><p class="hint">Aparece ao lado da marca, no topo. Fica salvo neste navegador.</p></div>
+  <div class="grid2">
+   <div class="field"><label for="disclaimer">Aviso na lateral</label><select id="disclaimer"><option value="1">Mostrar "*preços sujeitos a alterações"</option><option value="">Não mostrar</option></select></div>
+  <div class="field"><label for="accent">Cor de destaque</label><select id="accent"><option value="#08df70">Verde promocional</option><option value="#ffb900">Amarelo ouro</option><option value="#ff4d24">Laranja</option><option value="#47b8ff">Azul</option></select></div>
+  </div>
+ </div>
+
+ <details class="cfg" id="cfg">
+  <summary>⚙️ Configurações da IA de cenário</summary>
+  <div class="field"><label for="provider">Serviço de IA</label><select id="provider">
+   <option value="pollinations">Pollinations · chave grátis</option>
+   <option value="gemini">Google Gemini · chave do AI Studio</option>
+   <option value="openai">OpenAI · chave da API (pago)</option>
+  </select></div>
+  <div class="field"><label for="apikey">Chave da API</label><input id="apikey" type="password" autocomplete="off" placeholder="Cole a chave aqui"><p class="hint" id="keyHint"></p></div>
+  <div class="field"><label for="model">Modelo (opcional)</label><input id="model" placeholder="padrão"></div>
+ </details>
+
+ <button class="primary" id="render" type="button">ATUALIZAR PRÉVIA</button>
+ <div class="actions" style="margin-top:9px">
+  <button class="green" id="download" type="button">⬇ Baixar arte PNG</button>
+  <button class="soft" id="save" type="button">Salvar dados</button>
+  <button class="soft" id="reset" type="button">Limpar</button>
+ </div>
+ <div class="status" id="status" aria-live="polite"></div>
+ <div class="tip"><b>Importante:</b> confira se o preço, o cupom e o estoque continuam válidos no anúncio antes de publicar. O desconto é calculado a partir dos dois preços informados.</div>
+</section>
+<section class="preview">
+ <div class="previewtop"><h2>Prévia do Status</h2><span class="pill" style="background:#f1f5f9;color:#475569;border-color:#e2e8f0">1080 × 1920</span></div>
+ <div class="canvaswrap"><canvas id="art" width="1080" height="1920"></canvas><div class="busy" id="busy"><div><span class="spin"></span><span id="busyText">Gerando cenário com IA…</span></div></div></div>
+ <div class="previewfoot">Evite informações essenciais muito próximas das bordas superior e inferior.</div>
+</section>
+</main>
+<script src="ia.js"></script>
+<script id="scriptGoogle" src="https://accounts.google.com/gsi/client" async onerror="window.__gsiFalhou = true"></script>
+<script>
+// ---------- Conta (login com Google) e servidor (Apps Script) ----------
+var API_URL = 'https://script.google.com/macros/s/AKfycbxym8lbvmn3T_kIQHfFoixeW3SIkDS-qLLs8slx0IzNX-oLf59_gLOUHW3xoTqCgmsYqQ/exec';
+var GOOGLE_CLIENT_ID = '577232193037-6c8fkjci9g2c2ggn5do0r1i6grp4c9qa.apps.googleusercontent.com';
+var LS_SESSAO = 'gs_sessao';
+var LS_NOME = 'gs_nome';
+var MSG_FALHA_GOOGLE = 'Não consegui carregar o login do Google. Verifique a conexão e recarregue.';
+var googleCarregado = false;
+function lerLS(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function gravarLS(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function apagarLS(k){try{localStorage.removeItem(k)}catch(e){}}
+function avisoLogin(msg,erro){const el=document.getElementById('avisoLogin');el.textContent=msg||'';el.className=erro?'erro':''}
+function mostrarTelaLogin(){
+ document.getElementById('app').hidden=true;document.getElementById('conta').hidden=true;document.getElementById('logout').hidden=true;
+ document.getElementById('telaLogin').hidden=false;renderizarBotaoGoogle();
+}
+function mostrarApp(nome){
+ document.getElementById('telaLogin').hidden=true;document.getElementById('nomeConta').textContent=nome||'';
+ document.getElementById('conta').hidden=false;document.getElementById('logout').hidden=false;document.getElementById('app').hidden=false;
+}
+// Apaga a sessão deste aparelho e volta para o login, com um aviso opcional.
+function voltarLogin(msg,erro){
+ apagarLS(LS_SESSAO);apagarLS(LS_NOME);mostrarTelaLogin();
+ if(!googleCarregado||window.__gsiFalhou)avisoLogin(msg?msg+'\n'+MSG_FALHA_GOOGLE:MSG_FALHA_GOOGLE,true);else avisoLogin(msg,erro);
+}
+// POST simples (sem Content-Type, sem preflight de CORS). A sessão vai no corpo, nunca na URL.
+async function api(params){
+ const sessaoEnviada=lerLS(LS_SESSAO);let resp;
+ try{resp=await fetch(API_URL,{method:'POST',body:JSON.stringify(Object.assign({sessao:sessaoEnviada},params))})}
+ catch(e){throw new Error('Falha de rede. Confira a internet e tente de novo.')}
+ const r=await resp.json().catch(()=>({ok:false,erro:'rede'}));
+ // Só derruba a sessão se ela ainda for a que foi enviada (a pessoa pode ter entrado de novo nesse meio tempo).
+ if(!r.ok&&(params.action==='info'||params.action==='img')&&lerLS(LS_SESSAO)===sessaoEnviada){
+  if(r.erro==='sessao')voltarLogin('Sua sessão terminou (sua conta entrou em outro aparelho). Entre de novo.',true);
+  else if(r.erro==='sem_acesso')voltarLogin('Seu acesso foi desativado.',true);
+ }
+ return r;
+}
+function iniciarGoogle(){
+ if(typeof google==='undefined'||!google.accounts||!google.accounts.id)return;
+ if(document.getElementById('avisoLogin').textContent===MSG_FALHA_GOOGLE)avisoLogin('');
+ if(!googleCarregado){google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:aoLogar});googleCarregado=true}
+ renderizarBotaoGoogle();
+}
+function renderizarBotaoGoogle(){
+ if(!googleCarregado)return;const b=document.getElementById('botaoGoogle');b.innerHTML='';
+ google.accounts.id.renderButton(b,{theme:'outline',size:'large',text:'signin_with',locale:'pt-BR'});
+}
+async function aoLogar(resp){
+ avisoLogin('Entrando…');let r;
+ try{r=await api({action:'login',idToken:resp.credential})}catch(e){avisoLogin('Não consegui confirmar seu login. Tente de novo.',true);return}
+ if(r.ok){gravarLS(LS_SESSAO,r.sessao);gravarLS(LS_NOME,r.nome);avisoLogin('');mostrarApp(r.nome)}
+ else if(r.erro==='sem_acesso')avisoLogin('Essa conta Google não tem acesso ao Gerador de Story.',true);
+ else avisoLogin('Não consegui confirmar seu login. Tente de novo.',true);
+}
+// Foto do produto pelo servidor (o Mercado Livre não deixa o navegador baixar direto para o canvas).
+async function fotoDoServidor(url){
+ const r=await api({action:'img',url});
+ if(!r.ok)throw new Error('foto');
+ return 'data:'+r.mime+';base64,'+r.base64;
+}
+const MSG_INFO={
+ host:'Esse link não é do Mercado Livre.',
+ link_curto:'Não achei os dados nesse link. Confira se é o link de afiliado ou envie a foto e digite o preço.',
+ rede:'Não consegui falar com o Mercado Livre agora. Tente de novo.',
+ sessao:'Sua sessão terminou. Entre de novo.',
+ sem_acesso:'Seu acesso foi desativado.'
+};
+const $=id=>document.getElementById(id),canvas=$('art'),ctx=canvas.getContext('2d');
+let productSrc=null,productImg=null,productCut=false,bgImg=null,bgIntegrated=false,bgJob=0;
+const fields=['title','price','old','campaign','tagWord','payment','coupon','link','mode','category','extra','zoom','ypos','brand','brandFont','brandColor','brandSize','pill','disclaimer','accent'];
+
+// ---------- Cenários ----------
+const SCENES={
+ cozinha:{label:'Eletrodomésticos · cozinha moderna',pt:'em uma cozinha contemporânea clara, sobre bancada de pedra',en:'a bright contemporary kitchen, light stone countertop in the foreground'},
+ bancada:{label:'Utensílios · bancada com luz natural',pt:'em uma bancada clean de cozinha com luz natural',en:'a clean minimalist kitchen counter by a window with natural daylight'},
+ closet:{label:'Roupas e calçados · closet',pt:'em um closet minimalista, sobre uma bancada de madeira clara',en:'a minimalist walk-in closet, light wood bench in the foreground, clothes softly blurred behind'},
+ beleza:{label:'Beleza e perfumes · penteadeira',pt:'em uma penteadeira sofisticada, com mármore claro',en:'an elegant vanity table with a light marble top, soft mirror and warm glow'},
+ banheiro:{label:'Higiene · banheiro spa',pt:'em um banheiro moderno estilo spa, com bancada de mármore',en:'a spa-like modern bathroom, marble countertop in the foreground, plants and soft towels blurred'},
+ escritorio:{label:'Informática e eletrônicos · escritório',pt:'em uma mesa de escritório moderno e organizado',en:'a modern tidy home office desk, a small plant and soft daylight, monitor blurred in the background'},
+ sala:{label:'Casa e decoração · sala',pt:'em uma sala de estar contemporânea e aconchegante',en:'a cozy contemporary living room, low wooden side table in the foreground'},
+ quarto:{label:'Cama, mesa e banho · quarto',pt:'em um quarto aconchegante com roupa de cama clara',en:'a calm cozy bedroom with light bedding and a wooden nightstand in the foreground'},
+ oficina:{label:'Ferramentas · oficina',pt:'em uma oficina doméstica organizada, com ferramentas ao fundo',en:'an organized home workshop, wooden workbench in the foreground, tools softly blurred on the wall'},
+ infantil:{label:'Bebês e brinquedos · quarto infantil',pt:'em um quarto infantil em tons pastel',en:'a soft pastel kids bedroom, white shelf in the foreground, playful but clean'},
+ fitness:{label:'Esporte e fitness · academia em casa',pt:'em um canto de academia em casa, claro e moderno',en:'a bright modern home gym corner with a wooden floor and plants'},
+ pet:{label:'Pet shop · casa com pet',pt:'em uma sala clara com tapete macio, ambiente pet friendly',en:'a bright cozy living room floor with a soft rug, pet-friendly home'},
+ jardim:{label:'Jardim e área externa · varanda',pt:'em uma varanda com plantas e luz do sol',en:'a sunny balcony with plants and a wooden deck in the foreground'},
+ carro:{label:'Automotivo · garagem',pt:'em uma garagem moderna e limpa',en:'a clean modern garage with soft lighting and a polished concrete floor'}
+};
+const KEYWORDS=[
+ ['carro',/automotiv|carro|veícul|veicul|moto\b|pneu|automóvel/],
+ ['pet',/\bpet|cachorr|gato|ração|racao|coleira|aquário/],
+ ['infantil',/bebê|bebe|brinquedo|infantil|boneca|carrinho de bebê|fralda|lego/],
+ ['fitness',/fitness|academia|halter|esporte|bicicleta|yoga|esteira|suplemento|whey/],
+ ['oficina',/ferrament|furadeira|parafusadeira|serra|alicate|chave de|compressor|lixadeira/],
+ ['jardim',/jardim|jardinagem|piscina|churrasqueira|vaso|mangueira|externa/],
+ ['beleza',/beleza|perfume|maquiagem|cosmétic|cosmetic|skincare|secador|chapinha|prancha|batom|hidratante|barbeador|depilador/],
+ ['banheiro',/banheiro|toalha|higiene|escova de dente|shampoo|sabonete/],
+ ['escritorio',/\b(notebooks|laptops|computer|mice|keyboards|monitors|headphones|cellphones|smartphones|tablets|speakers|smartwatches|printers)\b|informática|informatica|notebook|computador|mouse|teclado|monitor|headset|fone|celular|smartphone|tablet|eletrônic|eletronic|impressora|ssd|caixa de som|smartwatch|câmera|camera|games|console|controle/],
+ ['closet',/roupa|moda|camiseta|camisa|calça|vestido|tênis|tenis|sapato|bolsa|jaqueta|blusa|bermuda|chinelo|sandália|relógio|relogio|óculos|mochila|calçado|boné|bone\b|chapéu|meia|cueca|lingerie|\b(caps|hats|shirts|t shirts|shoes|sneakers|pants|dresses|bags|backpacks|wristwatches|sunglasses|jackets|clothing)\b/],
+ ['quarto',/cama|colchão|colchao|travesseiro|lençol|lencol|edredom|cobertor|cortina/],
+ ['bancada',/utensílio|utensilio|faca|tábua|pote|garrafa|copo|talher|organizador|escorredor|forma/],
+ ['cozinha',/\b(fryers|blenders|cookware|coffee makers|microwaves|refrigerators|mixers|ovens)\b|cozinha|eletrodoméstic|eletrodomestic|air fryer|airfryer|fritadeira|liquidificador|panela|cafeteira|micro-ondas|microondas|geladeira|batedeira|mixer|sanduicheira|forno|cooktop|purificador|grill/],
+ ['sala',/decoraç|decorac|luminária|luminaria|tapete|almofada|sofá|sofa|móve|move|quadro|aspirador|ventilador|ar-condicionado|casa/]
+];
+$('category').innerHTML=Object.entries(SCENES).map(([k,s])=>`<option value="${k}">${s.label}</option>`).join('');
+function detectScene(text){const t=String(text||'').toLowerCase();for(const [k,rx] of KEYWORDS)if(rx.test(t))return k;return null}
+function scenePrompt(){
+ const s=SCENES[$('category').value]||SCENES.sala,extra=$('extra').value.trim();
+ return `Vertical 9:16 professional photograph used as the background of a product advertisement: ${s.en}. The lower-middle center of the frame is an empty, clear surface where a product will be placed later, so do not show any product, object or device in the center. ${extra?'Style details: '+extra+'. ':''}Soft natural lighting, gentle depth of field with a softly blurred background, realistic, premium e-commerce photography, warm and inviting, clean and uncluttered composition. No text, no letters, no logos, no people, no watermark.`;
+}
+function productScenePrompt(){
+ const s=SCENES[$('category').value]||SCENES.sala,extra=$('extra').value.trim(),name=$('title').value.trim();
+ return `Create a vertical 9:16 professional advertising photograph of THIS EXACT product from the reference image, placed naturally in ${s.en}. `+
+ `Keep the product 100% identical to the reference: same shape, proportions, colors, materials, logo and details. Do not redesign it, do not add or remove parts, do not change its text or brand.${name?' (The product is: '+name+'.)':''} `+
+ `The product is the hero of the photo: realistic scale, resting on a surface, centered horizontally and keep it in the same position and size it has in the reference image (centered, in the middle band of the frame), medium-sized, about 50% of the image width. The ENTIRE product must be fully visible inside the frame, never cropped or cut by the image edges, with free space around it on all sides, with natural contact shadows, reflections and lighting that match the scene. `+
+ `Keep the top 16% and the bottom 35% of the image calm and uncluttered, because text will be overlaid there. ${extra?'Style details: '+extra+'. ':''}`+
+ `Soft natural light, gentle depth of field, premium e-commerce photography. No added text, no letters, no extra products, no people, no watermark.`;
+}
+
+// ---------- Desenho ----------
+function money(v){if(typeof v==='number')return v;let s=String(v||'').trim().replace(/\s/g,'').replace(/\.(?=.*[,])/g,'').replace(',','.').replace(/[^\d.]/g,'');let n=Number(s);return Number.isFinite(n)?n:0}
+function fmt(n){return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function round(x,y,w,h,r,color){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=color;ctx.fill()}
+function fitWidth(img,W,H){
+ const s=W/img.width,h=img.height*s;
+ if(h>=H){ctx.drawImage(img,0,(img.height-H/s)/2,img.width,H/s,0,0,W,H);return}
+ ctx.save();ctx.filter='blur(28px) brightness(.85)';cover(img,-40,-40,W+80,H+80);ctx.restore();
+ ctx.drawImage(img,0,(H-h)/2,W,h);
+}
+function cover(img,x,y,w,h){let s=Math.max(w/img.width,h/img.height),sw=w/s,sh=h/s;ctx.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,x,y,w,h)}
+const PRODUCT_BASE=.78; // 100% no controle = 78% do espaço livre entre o título e o preço
+function contain(img,x,y,w,h,scale=1,offsetY=0){
+ let s=Math.min(w/img.width,h/img.height)*scale,iw=img.width*s,ih=img.height*s,dx=x+(w-iw)/2,dy=y+(h-ih)/2+offsetY;
+ if(productCut){ // sombra de contato no "chão"
+  ctx.save();let cx=dx+iw/2,cy=dy+ih-6,rx=iw*.42,g=ctx.createRadialGradient(cx,cy,0,cx,cy,rx);g.addColorStop(0,'rgba(0,0,0,.42)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.translate(cx,cy);ctx.scale(1,.13);ctx.translate(-cx,-cy);ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,rx,0,Math.PI*2);ctx.fill();ctx.restore();
+ }
+ ctx.save();ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=28;ctx.shadowOffsetY=17;ctx.drawImage(img,dx,dy,iw,ih);ctx.restore()
+}
+function linesFor(text,max,font){ctx.font=font;let out=[],line='';for(let word of text.split(/\s+/)){let t=line?line+' '+word:word;if(ctx.measureText(t).width>max&&line){out.push(line);line=word}else line=t}if(line)out.push(line);return out}
+// ---------- Modelo da arte (medidas tiradas do status de referência, em 1080 × 1920) ----------
+const F_COND="'Anton','Impact','Arial Narrow',sans-serif",F_TITLE="'Inter','Segoe UI',Arial,sans-serif",F_MONO="'Space Mono','Courier New',monospace";
+const F_NUM=F_COND; // usado para avisar quando as fontes carregarem
+const TAG_WORDS=['IMPERDÍVEL','ACHADINHO','OFERTA'];
+let autoWord=TAG_WORDS[Math.floor(Math.random()*TAG_WORDS.length)],logoImg=null;
+function shuffleWord(){const opts=TAG_WORDS.filter(w=>w!==autoWord);autoWord=opts[Math.floor(Math.random()*opts.length)]}
+function tagText(){const v=$('tagWord').value,w=v==='auto'?autoWord:v,pre=$('campaign').value.trim().toUpperCase();return pre?pre+' · '+w:w}
+function shadowed(fn,blur=14,oy=6,c='rgba(0,0,0,.55)'){ctx.save();ctx.shadowColor=c;ctx.shadowBlur=blur;ctx.shadowOffsetY=oy;fn();ctx.restore()}
+// Altura visível do texto acima da linha de base (independe do textBaseline atual).
+const asc=t=>{const b=ctx.textBaseline;ctx.textBaseline='alphabetic';const a=ctx.measureText(t).actualBoundingBoxAscent;ctx.textBaseline=b;return a};
+
+const PB={X:64,tagY:1258,tagH:54,tagFont:28,int:176,rs:54,cents:66,pay:36,old:32,cupLabel:19,cupCode:50,cupH:86,cupMaxW:640,discX:922,discY:1438,discR:100};
+
+// Converte altura visível desejada (px) em tamanho de fonte, medindo a própria fonte.
+function capSize(cap,family){ctx.font=`100px ${family}`;return cap*100/(asc('0')||72)}
+function priceLayout(){
+ const fI=capSize(PB.int,F_COND),fR=capSize(PB.rs,F_COND),fC=capSize(PB.cents,F_COND);
+ const p=money($('price').value),o=money($('old').value),d=o>p&&p>0?Math.round((1-p/o)*100):0,pay=$('payment').value;
+ const [pi,pc]=(p?fmt(p):'0,00').split(','),cp=$('coupon').value.trim().toUpperCase().replace(/\s+/g,''),hasOld=o>p&&p>0;
+ const right=d>0?PB.discX-PB.discR-18:1080-PB.X;
+ const width=s=>{ctx.font=`${fR*s}px ${F_COND}`;let w=ctx.measureText('R$').width+10*s;ctx.font=`${fI*s}px ${F_COND}`;w+=ctx.measureText(pi).width+6*s;
+  ctx.font=`${fC*s}px ${F_COND}`;const c=ctx.measureText(','+pc).width;ctx.font=`800 ${capSize(PB.pay*.75,F_TITLE)*s}px ${F_TITLE}`;return w+Math.max(c,pay?ctx.measureText(pay).width:0)};
+ let S=1;while(width(S)>right-PB.X&&S>.55)S-=.03;
+ return {p,o,d,pay,pi,pc,cp,hasOld,S,fI,fR,fC,top:PB.tagY};
+}
+
+function draw(){
+ const W=1080,H=1920,accent=$('accent').value;ctx.clearRect(0,0,W,H);
+ if(bgImg&&bgIntegrated)fitWidth(bgImg,W,H);else if(bgImg)cover(bgImg,0,0,W,H);else{let g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#dedbd3');g.addColorStop(.5,'#c5c0b5');g.addColorStop(1,'#817a70');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(0,0,W,1160)}
+ // Sombras para o texto aparecer em qualquer cenário
+ let shade=ctx.createLinearGradient(0,0,0,H);shade.addColorStop(0,'rgba(0,0,0,.55)');shade.addColorStop(.2,'rgba(0,0,0,0)');shade.addColorStop(.55,'rgba(0,0,0,0)');shade.addColorStop(.72,'rgba(0,0,0,.45)');shade.addColorStop(1,'rgba(0,0,0,.7)');ctx.fillStyle=shade;ctx.fillRect(0,0,W,H);
+ // Topo: logo + marca à esquerda, selo à direita
+ drawTop();
+ // Título
+ const title=$('title').value.trim()||'Nome do produto';let fs=60,tl=linesFor(title,940,`800 60px ${F_TITLE}`);
+ if(tl.length>2){fs=50;tl=linesFor(title,940,`800 50px ${F_TITLE}`)}
+ if(tl.length>2){tl=tl.slice(0,2);let l=tl[1];while(l&&ctx.measureText(l+'…').width>940)l=l.slice(0,-1);tl[1]=l.trimEnd()+'…'}
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`800 ${fs}px ${F_TITLE}`;ctx.fillStyle='#fff';
+ shadowed(()=>tl.forEach((t,i)=>ctx.fillText(t,W/2,288+i*fs*1.15)),16,3,'rgba(0,0,0,.6)');
+ // Produto (entre o título e a etiqueta)
+ const L=priceLayout(),pTop=330+(tl.length-1)*fs*1.15+20,pH=L.top-30-pTop;
+ if(bgIntegrated){/* o produto já faz parte da foto gerada pela IA */}
+ else if(productImg)contain(productImg,90,pTop,900,pH,PRODUCT_BASE*Number($('zoom').value)/100,Number($('ypos').value));
+ else{round(100,pTop+40,880,pH-80,26,'rgba(255,255,255,.2)');ctx.fillStyle='#fff';ctx.font='bold 35px Arial';ctx.fillText('ADICIONE A FOTO DO PRODUTO',540,pTop+pH/2)}
+ drawPriceBlock(accent,L);
+ // Aviso lateral
+ if($('disclaimer').value){ctx.save();ctx.translate(26,960);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`400 19px ${F_MONO}`;ctx.letterSpacing='2px';ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillText('*preços sujeitos a alterações',0,0);ctx.restore();ctx.letterSpacing='0px'}
+}
+
+function brandFamily(){const [w,n]=($('brandFont').value||'400|Anton').split('|');return {w,f:`'${n}',Impact,sans-serif`}}
+function drawTop(){
+ const y=183,bRaw=$('brand').value.trim(),brand=/Lobster|Pacifico/.test($('brandFont').value)?bRaw:bRaw.toUpperCase(),pill=$('pill').value.trim().toUpperCase();let x=50;
+ ctx.textBaseline='middle';ctx.textAlign='left';
+ ctx.font=`700 23px ${F_MONO}`;ctx.letterSpacing='2px';const pw=pill?ctx.measureText(pill).width+40:0;ctx.letterSpacing='0px';
+ if(logoImg){const h=74,w=logoImg.width*h/logoImg.height;shadowed(()=>ctx.drawImage(logoImg,x,y-h/2,w,h),8,2,'rgba(0,0,0,.4)');x+=w+12}
+ if(brand){
+  // Marca: fonte, cor e tamanho escolhidos em "Identidade da arte"; encolhe se encostar no selo
+  const fam=brandFamily(),maxW=1080-50-(pw?pw+24:0)-x;let fs=+$('brandSize').value||46;
+  do{ctx.font=`${fam.w} ${fs}px ${fam.f}`;if(ctx.measureText(brand).width<=maxW)break;fs-=2}while(fs>20);
+  ctx.fillStyle=$('brandColor').value||'#ffc61a';shadowed(()=>ctx.fillText(brand,x,y+2),8,3,'rgba(0,0,0,.6)');
+ }
+ if(pill){
+  ctx.font=`700 23px ${F_MONO}`;ctx.letterSpacing='2px';const h=50,w=pw,px=1080-50-w;
+  ctx.beginPath();ctx.roundRect(px,y-h/2,w,h,h/2);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.stroke();
+  ctx.fillStyle='#fff';ctx.fillText(pill,px+20,y+1);ctx.letterSpacing='0px';
+ }
+}
+
+function drawPriceBlock(accent,L){
+ const X=PB.X,{d,pay,pi,pc,cp,hasOld,S,fI,fR,fC}=L;let y=L.top;
+ ctx.textAlign='left';ctx.textBaseline='middle';
+ // Etiqueta vermelha ("IMPERDÍVEL")
+ const tt=tagText();ctx.font=`700 ${PB.tagFont}px ${F_MONO}`;ctx.letterSpacing='3px';
+ const tw=ctx.measureText(tt).width,bw=tw+34;
+ shadowed(()=>round(X-4,y,bw,PB.tagH,5,'#ec3f34'),10,3,'rgba(0,0,0,.35)');
+ ctx.fillStyle='#fff';ctx.fillText(tt,X-4+17,y+PB.tagH/2+2);ctx.letterSpacing='0px';
+ y+=PB.tagH+14;
+ // Preço em fonte condensada: R$ e centavos alinhados pelo topo do número
+ ctx.textBaseline='alphabetic';ctx.font=`${fI*S}px ${F_COND}`;const capI=asc(pi),base=y+capI;let x=X;
+ shadowed(()=>{
+  ctx.fillStyle=accent;
+  ctx.font=`${fR*S}px ${F_COND}`;ctx.fillText('R$',x,y+asc('R$'));x+=ctx.measureText('R$').width+10*S;
+  ctx.font=`${fI*S}px ${F_COND}`;ctx.fillText(pi,x,base);x+=ctx.measureText(pi).width+6*S;
+  ctx.font=`${fC*S}px ${F_COND}`;ctx.fillText(','+pc,x,y+asc('05'));
+ },16,6,'rgba(0,0,0,.6)');
+ if(pay){ctx.font=`${fC*S}px ${F_COND}`;const cy=y+asc('05');ctx.font=`800 ${capSize(PB.pay*.75,F_TITLE)*S}px ${F_TITLE}`;shadowed(()=>{ctx.fillStyle='#fff';ctx.fillText(pay,x+2,cy+asc('P')+18*S)},10,3,'rgba(0,0,0,.7)')}
+ y=base;
+ // "de R$ 399,90" riscado, sem caixa
+ if(hasOld){
+  y+=40;const ot='de R$ '+fmt(L.o).replace(/,00$/,'');ctx.font=`400 ${PB.old}px ${F_MONO}`;ctx.letterSpacing='1px';const ow=ctx.measureText(ot).width;
+  ctx.textBaseline='middle';shadowed(()=>{ctx.fillStyle='#eceef0';ctx.fillText(ot,X-4,y)},8,2,'rgba(0,0,0,.8)');ctx.letterSpacing='0px';
+  shadowed(()=>{ctx.strokeStyle='#eceef0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X-6,y+2);ctx.lineTo(X+ow,y+2);ctx.stroke()},6,1,'rgba(0,0,0,.6)');
+  y+=PB.old/2;
+ }
+ // Cupom com borda tracejada
+ if(cp){
+  y+=26;const h=PB.cupH;
+  ctx.font=`400 ${PB.cupLabel}px ${F_MONO}`;ctx.letterSpacing='1px';const lw=Math.max(ctx.measureText('USE O').width,ctx.measureText('CUPOM').width);
+  let fs=PB.cupCode,cw;do{ctx.font=`700 ${fs}px ${F_MONO}`;ctx.letterSpacing='2px';cw=ctx.measureText(cp).width;if(24+lw+22+cw+24<=PB.cupMaxW)break;fs-=2}while(fs>24);
+  const bw2=24+lw+22+cw+24,bx=X-4;
+  shadowed(()=>{ctx.beginPath();ctx.roundRect(bx,y,bw2,h,9);ctx.fillStyle='rgba(8,40,24,.93)';ctx.fill()},14,5,'rgba(0,0,0,.4)');
+  ctx.beginPath();ctx.roundRect(bx+1.5,y+1.5,bw2-3,h-3,9);ctx.setLineDash([11,7]);ctx.lineWidth=3;ctx.strokeStyle=accent;ctx.stroke();ctx.setLineDash([]);
+  ctx.textBaseline='middle';ctx.globalAlpha=.75;ctx.fillStyle=accent;ctx.font=`400 ${PB.cupLabel}px ${F_MONO}`;ctx.letterSpacing='1px';
+  ctx.fillText('USE O',bx+24,y+h/2-12);ctx.fillText('CUPOM',bx+24,y+h/2+13);ctx.globalAlpha=1;
+  ctx.font=`700 ${fs}px ${F_MONO}`;ctx.letterSpacing='2px';ctx.fillText(cp,bx+24+lw+22,y+h/2+3);ctx.letterSpacing='0px';
+ }
+ // Selo de desconto amarelo, inclinado
+ if(d>0){
+  const r=PB.discR,cx=PB.discX,cy=PB.discY;
+  shadowed(()=>{ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#ffc61a';ctx.fill()},18,6,'rgba(0,0,0,.4)');
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(-.13);ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillStyle='#141414';
+  let ds='-'+d+'%',dfs=92;ctx.font=`${dfs}px ${F_COND}`;while(ctx.measureText(ds).width>r*1.7&&dfs>40){dfs-=3;ctx.font=`${dfs}px ${F_COND}`}
+  const da=asc(ds);ctx.fillText(ds,0,da/2-10);ctx.font=`700 20px ${F_MONO}`;ctx.letterSpacing='3px';ctx.fillText('OFF',0,da/2+20);ctx.letterSpacing='0px';ctx.restore();
+ }
+ ctx.textBaseline='middle';ctx.textAlign='left';
+}
+function status(t,err){const s=$('status');s.textContent=t;s.classList.toggle('err',!!err)}
+function busy(on,text){$('busy').classList.toggle('on',on);if(text)$('busyText').textContent=text}
+
+// ---------- Foto do produto: remove fundo branco ----------
+function cutWhite(img){
+ const s=Math.min(1,1400/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*s)),h=Math.max(1,Math.round(img.height*s));
+ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h);
+ const id=x.getImageData(0,0,w,h),p=id.data,N=w*h;
+ // fundo = branco puro; "sombra" = cinza bem claro e sem cor ligado ao fundo (vira sombra transparente de verdade)
+ const bg=k=>{const i=k*4;if(p[i+3]<20)return true;const r=p[i],g=p[i+1],b=p[i+2],mn=Math.min(r,g,b);return mn>=230&&Math.max(r,g,b)-mn<=18};
+ // sombra da foto no "chão": cinza neutro (sem cor) na parte de baixo da imagem, ligado ao fundo
+ const floorY=Math.round(h*.55);
+ const shadow=k=>{if(k<floorY*w)return false;const i=k*4,mn=Math.min(p[i],p[i+1],p[i+2]);return mn>=70&&Math.max(p[i],p[i+1],p[i+2])-mn<=6};
+ const border=[];for(let i=0;i<w;i++)border.push(i,(h-1)*w+i);for(let j=1;j<h-1;j++)border.push(j*w,j*w+w-1);
+ if(border.filter(bg).length/border.length<.6)return {img,cut:false}; // foto com ambiente: mantém como está
+ const seen=new Uint8Array(N),q=new Int32Array(N);let qh=0,qt=0;
+ for(const k of border)if(!seen[k]&&bg(k)){seen[k]=1;q[qt++]=k}
+ while(qh<qt){const k=q[qh++],cx=k%w,i=k*4;
+  if(bg(k))p[i+3]=0;else{const mn=Math.min(p[i],p[i+1],p[i+2]);p[i]=p[i+1]=p[i+2]=0;p[i+3]=Math.round(Math.min(150,(255-mn)*.85))}
+  const nb=[cx>0?k-1:-1,cx<w-1?k+1:-1,k-w,k+w];
+  for(const n of nb)if(n>=0&&n<N&&!seen[n]&&(bg(n)||shadow(n))){seen[n]=1;q[qt++]=n}}
+ for(let k=0;k<N;k++){if(seen[k])continue;const cx=k%w;
+  if((cx>0&&seen[k-1])||(cx<w-1&&seen[k+1])||(k>=w&&seen[k-w])||(k+w<N&&seen[k+w])){const i=k*4,mn=Math.min(p[i],p[i+1],p[i+2]);if(mn>185)p[i+3]=Math.min(p[i+3],Math.max(50,(255-mn)*3.6))}}
+ x.putImageData(id,0,0);return {img:c,cut:true};
+}
+function setProduct(img){productSrc=img;if($('cutBg').checked){const r=cutWhite(img);productImg=r.img;productCut=r.cut}else{productImg=img;productCut=false}draw()}
+function loadImgUrl(url){return new Promise((ok,fail)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=()=>fail(new Error('Não foi possível abrir essa imagem.'));im.src=url})}
+async function loadFile(file,cb){if(!file)return;const url=URL.createObjectURL(file);try{cb(await loadImgUrl(url));status('Imagem carregada.')}catch(e){status(e.message,true)}finally{URL.revokeObjectURL(url)}}
+$('product').addEventListener('change',e=>loadFile(e.target.files[0],im=>{if(bgIntegrated){bgImg=null;bgIntegrated=false}setProduct(im)}));
+$('background').addEventListener('change',e=>loadFile(e.target.files[0],im=>{bgJob++;bgImg=im;bgIntegrated=false;busy(false);$('genBg').disabled=false;draw()}));
+$('cutBg').addEventListener('change',()=>{if(productSrc)setProduct(productSrc)});
+
+// ---------- Cenário com IA ----------
+const AI_KEY='larAchadinhosIA',HINTS={
+ pollinations:'Precisa de uma chave grátis: entre em enter.pollinations.ai (com Google ou GitHub) → Keys → crie a chave e cole aqui. A IA coloca o produto DENTRO do cenário (modelo kontext).',
+ gemini:'Crie a chave em aistudio.google.com → Get API key. Modelo padrão: gemini-2.5-flash-image.',
+ openai:'Crie a chave em platform.openai.com/api-keys (cobrança por imagem). Modelo padrão: gpt-image-1.'};
+function aiCfg(){return {provider:$('provider').value,key:$('apikey').value.trim(),model:$('model').value.trim()}}
+function saveAi(){try{localStorage.setItem(AI_KEY,JSON.stringify(aiCfg()))}catch(e){}$('keyHint').textContent=HINTS[$('provider').value]}
+try{const a=JSON.parse(localStorage.getItem(AI_KEY)||'null');if(a){$('provider').value=a.provider||'pollinations';$('apikey').value=a.key||'';$('model').value=a.model||''}}catch(e){}
+['provider','apikey','model'].forEach(id=>$(id).addEventListener('input',saveAi));saveAi();
+
+// Foto original do produto (com fundo branco, como a IA prefere) em JPEG de até 1024 px.
+function productDataUrl(){
+ // Vertical 9:16 (igual ao Status) com o produto inteiro na faixa do meio e margem em volta,
+ // para a IA devolver a cena já enquadrada e nada ser cortado depois.
+ const im=productSrc,c=document.createElement('canvas');c.width=720;c.height=1280;const x=c.getContext('2d');
+ x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+ const bw=c.width*.58,bh=c.height*.34,k=Math.min(bw/im.width,bh/im.height),w=im.width*k,h=im.height*k;
+ x.drawImage(im,(c.width-w)/2,c.height*.42-h/2,w,h);return c.toDataURL('image/jpeg',.92);
+}
+function canIntegrate(){const c=aiCfg();return c.provider!=='pollinations'||!!c.key}
+async function generateBackground(){
+ const job=++bgJob,cfg=aiCfg();
+ let integrate=$('mode').value==='integrar'&&!!productSrc,fallback=false;
+ if(integrate&&!canIntegrate()){integrate=false;fallback=true}
+ $('genBg').disabled=true;
+ busy(true,integrate?'Colocando o produto dentro do cenário…\n(pode levar até 1 min)':'Gerando cenário com IA…');
+ status(integrate?'Colocando o produto dentro do cenário…':'Gerando cenário com IA…');
+ try{
+  const quem={pollinations:'Pollinations',gemini:'Gemini',openai:'OpenAI'}[cfg.provider]||'Pollinations';
+  const pedido=integrate?pedidoProduto(cfg,productScenePrompt(),productDataUrl()):pedidoCena(cfg,scenePrompt());
+  const url=URL.createObjectURL(await gerarImagem(pedido,quem)),im=await loadImgUrl(url);URL.revokeObjectURL(url);
+  if(job!==bgJob)return;bgImg=im;bgIntegrated=integrate;$('background').value='';draw();
+  status(fallback?'Cenário gerado com o produto recortado por cima. Para a IA colocar o produto DENTRO do cenário, adicione uma chave grátis do Pollinations (ou Gemini/OpenAI) em “Configurações da IA”.'
+   :integrate?'Pronto! Produto dentro do cenário. Clique de novo para outra versão.':'Cenário gerado! Clique de novo para outra versão.',fallback);
+  if(fallback)$('cfg').open=true;
+ }catch(e){if(job===bgJob){status(e.message||'Falha ao gerar o cenário.',true);if(!cfg.key)$('cfg').open=true}}
+ finally{if(job===bgJob){busy(false);$('genBg').disabled=false}}
+}
+function modeHint(){$('modeHint').textContent=$('mode').value==='integrar'
+ ?(canIntegrate()?'A IA recebe a foto do produto e cria a cena com ele: luz, sombra e reflexo de verdade.':'Precisa de uma chave de IA (o Pollinations dá uma grátis em enter.pollinations.ai). Cole em “Configurações da IA”.')
+ :'O produto é recortado e colocado por cima do cenário criado pela IA (também precisa da chave).'}
+$('mode').addEventListener('change',()=>{modeHint();if(bgIntegrated&&$('mode').value==='recorte'){bgImg=null;bgIntegrated=false;draw()}});
+['provider','apikey'].forEach(id=>$(id).addEventListener('input',modeHint));
+$('genBg').onclick=generateBackground;
+
+
+async function applyOffer(d){
+ if(!d||typeof d!=='object')return;
+ if(d.title)$('title').value=String(d.title).replace(/\s+/g,' ').trim().slice(0,120);
+ const p=Number(d.price)||0,o=Number(d.old)||0;
+ if(p){$('price').value=fmt(p);$('old').value=o>p?fmt(o):''}else{$('price').value='';$('old').value=''}
+ if(!d.image){productSrc=productImg=null;productCut=false;$('product').value=''}
+ if(d.url&&!$('link').value.trim()){$('link').value=d.url;lastPulled=d.url}
+ const sc=detectScene((d.category||'')+' '+(d.title||''));if(sc)$('category').value=sc;
+ shuffleWord(); // cada oferta nova ganha outra palavra na etiqueta (quando estiver em "Alternar sozinho")
+ $('zoom').value=100;$('ypos').value=0;$('zoomVal').textContent='100%';$('yVal').textContent='0';
+ draw();status('Oferta recebida: '+(d.title||'produto')+'.');
+ bgImg=null;bgIntegrated=false;draw();
+ if(d.image)await fotoDoServidor(d.image).then(loadImgUrl).then(setProduct).catch(()=>status('Não consegui baixar a foto do produto. Envie a foto manualmente.',true));
+ if($('autoAI').checked)await generateBackground();
+}
+// ---------- Puxar só pelo link (Apps Script lê a página do afiliado) ----------
+let pulling=0,lastPulled='';
+async function pullFromLink(){
+ const link=$('link').value.trim();
+ if(!/^https?:\/\/\S+/i.test(link)){status('Cole o link do Mercado Livre começando com https://',true);return}
+ const job=++pulling;lastPulled=link;$('pull').disabled=true;busy(true,'Buscando dados do produto…');status('Buscando dados do produto…');
+ try{
+  const r=await api({action:'info',url:link});
+  if(job!==pulling)return;
+  if(!r.ok)throw new Error(MSG_INFO[r.erro]||'Não consegui puxar os dados. Tente de novo.');
+  busy(false);await applyOffer({title:r.titulo,price:r.preco,old:r.precoAntigo,image:r.imagem,category:r.categoria});
+ }catch(e){if(job===pulling){busy(false);status(e.message,true)}}
+ finally{if(job===pulling)$('pull').disabled=false}
+}
+$('pull').onclick=pullFromLink;
+$('link').addEventListener('paste',()=>setTimeout(()=>{if($('link').value.trim()!==lastPulled)pullFromLink()},0));
+$('link').addEventListener('keydown',e=>{if(e.key==='Enter')pullFromLink()});
+
+
+// ---------- Botões ----------
+fields.forEach(id=>$(id).addEventListener('input',()=>{if(id==='zoom')$('zoomVal').textContent=$('zoom').value+'%';if(id==='ypos')$('yVal').textContent=$('ypos').value;if(id==='brandSize')$('brandSizeVal').textContent=$('brandSize').value;draw()}));
+$('render').onclick=()=>{draw();status('Prévia atualizada.')};
+$('download').onclick=async()=>{
+ draw();const slug=($('title').value||'oferta').toLowerCase().normalize('NFD').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-').slice(0,40);
+ const nome=`oferta-${slug||'lar-de-achadinhos'}.png`;
+ try{
+  const celular=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const blob=await new Promise(ok=>canvas.toBlob(ok,'image/png')),arq=new File([blob],nome,{type:'image/png'});
+  if(celular&&navigator.canShare&&navigator.canShare({files:[arq]})){await navigator.share({files:[arq]});status('Arte pronta para compartilhar.');return}
+ }catch(e){if(e&&e.name==='AbortError')return}
+ const a=document.createElement('a');a.download=nome;a.href=canvas.toDataURL('image/png');a.click();status('Arte PNG preparada para salvar.');
+};
+$('copyLink').onclick=async()=>{let v=$('link').value.trim();if(!v){status('Cole primeiro seu link de afiliado.',true);return}try{await navigator.clipboard.writeText(v);status('Link de afiliado copiado.')}catch(e){$('link').select();status('Selecione e copie o link manualmente.')}};
+$('copyPrompt').onclick=async()=>{let s=SCENES[$('category').value]||SCENES.sala,extra=$('extra').value.trim();let prompt=`Crie uma fotografia publicitária vertical 9:16 de um cenário realista ${s.pt}. O produto principal será inserido depois na composição, então deixe o centro da cena livre e com superfície adequada. ${extra?extra+'. ':''}Iluminação natural suave, estética de fotografia profissional de e-commerce, ambiente elegante e organizado, sem textos, sem logotipos, sem produtos inventados e sem marcas d’água.`;try{await navigator.clipboard.writeText(prompt);status('Descrição do cenário copiada. Cole em seu gerador de imagens.')}catch(e){status(prompt)}};
+$('save').onclick=()=>{let data={};fields.forEach(id=>data[id]=$(id).value);try{localStorage.setItem('larAchadinhosSettings',JSON.stringify(data));status('Dados salvos neste navegador.')}catch(e){status('Não foi possível salvar neste navegador.',true)}};
+$('reset').onclick=()=>{if(!confirm('Limpar os campos e as imagens desta oferta?'))return;const def={campaign:'',tagWord:'auto',brand:'LAR DE ACHADINHOS',brandFont:'400|Anton',brandColor:'#ffc61a',brandSize:46,pill:'PARCERIA PAGA',disclaimer:'1',zoom:100,ypos:0};['title','price','old','coupon','link','extra','campaign','tagWord','brand','brandFont','brandColor','brandSize','pill','disclaimer','zoom','ypos'].forEach(id=>$(id).value=def[id]??'');$('zoomVal').textContent='100%';$('yVal').textContent='0';bgJob++;busy(false);$('genBg').disabled=false;productSrc=productImg=bgImg=null;productCut=false;bgIntegrated=false;$('product').value='';$('background').value='';loadBrandFont();status('Campos limpos.')};
+
+try{let saved=JSON.parse(localStorage.getItem('larAchadinhosSettings')||'null');if(saved){fields.forEach(id=>{if(saved[id]!==undefined)$(id).value=saved[id]})}}catch(e){}
+if($('category').selectedIndex<0)$('category').value='cozinha';
+if($('mode').selectedIndex<0)$('mode').value='integrar';
+$('zoomVal').textContent=$('zoom').value+'%';$('yVal').textContent=$('ypos').value;
+if($('tagWord').selectedIndex<0)$('tagWord').value='auto';
+$('shuffle').onclick=()=>{if($('tagWord').value!=='auto')$('tagWord').value='auto';shuffleWord();draw()};
+// As fontes da arte vêm do Google Fonts: redesenha quando terminarem de carregar.
+Promise.all([document.fonts.load(`80px ${F_COND}`),document.fonts.load(`800 40px ${F_TITLE}`),document.fonts.load(`700 34px ${F_MONO}`),document.fonts.load(`400 34px ${F_MONO}`)]).then(draw).catch(()=>{});
+function loadBrandFont(){const b=brandFamily();$('brandSizeVal').textContent=$('brandSize').value;document.fonts.load(`${b.w} 46px ${b.f}`).then(draw).catch(()=>{})}
+$('brandFont').addEventListener('change',loadBrandFont);setTimeout(loadBrandFont,0);
+// Logo da marca: guardado neste navegador
+const LOGO_KEY='larAchadinhosLogo';
+try{const u=localStorage.getItem(LOGO_KEY);if(u)loadImgUrl(u).then(im=>{logoImg=im;draw()}).catch(()=>{})}catch(e){}
+$('logo').addEventListener('change',e=>loadFile(e.target.files[0],im=>{const s=Math.min(1,240/im.height),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const u=c.toDataURL('image/png');try{localStorage.setItem(LOGO_KEY,u)}catch(err){}loadImgUrl(u).then(l=>{logoImg=l;draw()})}));
+$('logoDel').onclick=()=>{logoImg=null;try{localStorage.removeItem(LOGO_KEY)}catch(e){}$('logo').value='';draw();status('Logo removido.')};
+modeHint();draw();
+function iniciar(){if(lerLS(LS_SESSAO))mostrarApp(lerLS(LS_NOME));else mostrarTelaLogin()}
+$('logout').onclick=()=>{api({action:'sair'}).catch(()=>{});voltarLogin('')};
+iniciar();
+// O script do Google é async: pode terminar antes ou depois desta linha.
+const scriptGoogle=$('scriptGoogle');
+if(scriptGoogle){scriptGoogle.addEventListener('load',iniciarGoogle);scriptGoogle.addEventListener('error',()=>avisoLogin(MSG_FALHA_GOOGLE,true))}
+if(window.__gsiFalhou)avisoLogin(MSG_FALHA_GOOGLE,true);
+iniciarGoogle();
+setTimeout(()=>{if(!googleCarregado&&!$('telaLogin').hidden)avisoLogin(MSG_FALHA_GOOGLE,true)},8000);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body></html>
