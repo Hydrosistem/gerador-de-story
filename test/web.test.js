@@ -129,3 +129,11 @@ test('trocar de modelo troca a marca para o padrão do outro modelo só se não 
   assert.match(html, /function trocarPadroesMarca\(\)/);
   assert.match(html, /\$\('modelo'\)\.addEventListener\('change',trocarPadroesMarca\)/);
 });
+
+test('risco do "de R$" no Elegante: fino, na cor do texto e visível no Status', () => {
+  const ini = html.indexOf('if(l.antigo){');
+  const trecho = html.slice(ini, html.indexOf('}else{', ini));
+  assert.match(trecho, /ctx\.fillStyle='rgba\(244,239,230,\.6\)';ctx\.fillText\(l\.t,EL\.R,yy\)/);
+  assert.match(trecho, /ctx\.fillRect\(EL\.R-w,yy-10,w,3\)/);
+  assert.doesNotMatch(trecho, /\.85\)/);
+});

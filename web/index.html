@@ -460,7 +460,8 @@ function drawPrecoElegante(L){
   const yy=base-12-i*46;
   if(l.antigo){
    ctx.font=`400 27px ${F_SANS}`;ctx.fillStyle='rgba(244,239,230,.6)';ctx.fillText(l.t,EL.R,yy);
-   const w=ctx.measureText(l.t).width;ctx.fillRect(EL.R-w,yy-9,w,2);
+   // Risco fino na mesma cor do texto, no meio dos números (3 px: com 2 px some quando a arte aparece pequena)
+   const w=ctx.measureText(l.t).width;ctx.fillRect(EL.R-w,yy-10,w,3);
   }else{ctx.font=`500 28px ${F_SANS}`;ctx.fillStyle=EL.creme;ctx.fillText(l.t,EL.R,yy)}
  });
  ctx.textAlign='left';
