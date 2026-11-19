@@ -144,6 +144,21 @@ function iaMensagemErro_(quem, texto, status) {
   return quem + ': ' + iaCurto_(msg || 'HTTP ' + status);
 }
 
+// Conta sem saldo ou cota esgotada: esperar não resolve, então avisa na hora (sem novas tentativas).
+function iaSemCredito_(quem, texto) {
+  var t = String(texto || '');
+  if (quem === 'Pollinations' && /insufficient balance|available balance/i.test(t)) {
+    return 'Sua conta do Pollinations está sem saldo (cada cenário com o produto custa cerca de US$ 0,03). Recarregue em enter.pollinations.ai ou use o Gemini/OpenAI nas Configurações da IA.';
+  }
+  if (quem === 'OpenAI' && /insufficient_quota/i.test(t)) {
+    return 'Sua conta da OpenAI está sem crédito. Adicione crédito em platform.openai.com ou use outra IA nas Configurações da IA.';
+  }
+  if (quem === 'Gemini' && /RESOURCE_EXHAUSTED/.test(t) && /quota/i.test(t)) {
+    return 'A cota do Gemini acabou por agora. Tente mais tarde, ative o faturamento no Google AI Studio ou use outra IA nas Configurações da IA.';
+  }
+  return null;
+}
+
 // Faz o pedido com tempo máximo e novas tentativas quando o serviço está sem vaga (402/429/5xx).
 async function gerarImagem(pedido, quem) {
   var ultimo = '';
@@ -165,6 +180,8 @@ async function gerarImagem(pedido, quem) {
       var motivo = iaMensagemErro_(quem, ultimo, r.status).slice(quem.length + 2);
       throw new Error(quem + ' recusou a chave: ' + motivo + ' Ela pode ter sido apagada ou trocada: cole uma chave nova nas Configurações da IA.');
     }
+    var semCredito = iaSemCredito_(quem, ultimo);
+    if (semCredito) throw new Error(semCredito);
     if (r.status !== 402 && r.status !== 429 && r.status < 500) throw new Error(iaMensagemErro_(quem, ultimo, r.status));
     var espera = segundosRetry(ultimo) || 10;
     if (tentativa === IA_TENTATIVAS_ - 1 || espera > 60) break;

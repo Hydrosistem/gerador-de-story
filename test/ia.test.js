@@ -202,3 +202,29 @@ test('chave recusada mostra o motivo do serviço e diz para colar uma nova', asy
     /Pollinations recusou a chave: A valid API key is required\..*cole uma chave nova/,
   );
 });
+
+// ---- sem saldo / sem cota: avisa na hora, sem tentar de novo ----
+
+test('Pollinations sem saldo avisa na hora e não tenta de novo', async () => {
+  const corpo = '{"success":false,"error":{"message":"Insufficient balance. This request costs about $0.0300, but your available balance is $0.0000."}}';
+  const { ctx, chamadas } = ambiente([{ status: 402, headers: { 'Content-Type': 'application/json' }, body: corpo }, imagemOk()]);
+  await assert.rejects(
+    ctx.gerarImagem({ url: 'https://gen.pollinations.ai/v1/images/edits', init: {} }, 'Pollinations'),
+    /Sua conta do Pollinations está sem saldo.*enter\.pollinations\.ai/,
+  );
+  assert.equal(chamadas.length, 1);
+});
+
+test('OpenAI sem crédito (insufficient_quota) avisa na hora', async () => {
+  const corpo = '{"error":{"message":"You exceeded your current quota.","type":"insufficient_quota","code":"insufficient_quota"}}';
+  const { ctx, chamadas } = ambiente([{ status: 429, headers: { 'Content-Type': 'application/json' }, body: corpo }, imagemOk()]);
+  await assert.rejects(ctx.gerarImagem({ url: 'https://api.openai.com/v1/images/edits', init: {} }, 'OpenAI'), /Sua conta da OpenAI está sem crédito/);
+  assert.equal(chamadas.length, 1);
+});
+
+test('Gemini com cota esgotada (RESOURCE_EXHAUSTED) avisa na hora', async () => {
+  const corpo = '{"error":{"code":429,"message":"You exceeded your current quota.","status":"RESOURCE_EXHAUSTED"}}';
+  const { ctx, chamadas } = ambiente([{ status: 429, headers: { 'Content-Type': 'application/json' }, body: corpo }, imagemOk()]);
+  await assert.rejects(ctx.gerarImagem({ url: 'https://generativelanguage.googleapis.com/x', init: {} }, 'Gemini'), /A cota do Gemini acabou/);
+  assert.equal(chamadas.length, 1);
+});
