@@ -120,7 +120,7 @@ function paginaSocial_(url) {
 function buscarInfo_(url) {
   if (!hostProdutoPermitido(url)) return { ok: false, erro: 'host' };
   var cache = CacheService.getScriptCache();
-  var chave = 'i:' + md5Hex_(url);
+  var chave = 'i2:' + md5Hex_(url); // i2: leitura com preço no cartão e legendas em espanhol
   var salvo = cache.get(chave);
   if (salvo) return JSON.parse(salvo);
 

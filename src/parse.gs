@@ -166,7 +166,8 @@ function componente_(card, tipo) {
 
 // "Antes: 2.499 reais com 90 centavos" -> 2499.9
 function valorRotulo_(rotulo) {
-  var v = /(\d[\d.]*)\s+reais(?:\s+com\s+(\d+)\s+centavos?)?/i.exec(String(rotulo || ''));
+  // O ML escreve as legendas às vezes em português ("39 reais com 90 centavos"), às vezes em espanhol ("94 reales con 90 centavos").
+  var v = /(\d[\d.]*)\s+(?:reales|reais|real)\b(?:\s+(?:com|con|e|y)\s+(\d+)\s+centavos?)?/i.exec(String(rotulo || ''));
   if (!v) return null;
   var n = Number(v[1].replace(/\./g, '')) + (v[2] ? Number(v[2]) / 100 : 0);
   return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
@@ -198,12 +199,12 @@ function cartaoSocial_(html) {
   if (!bloco) return null;
   var titulo = (/class="poly-component__title"[^>]*>([^<]+)</.exec(bloco) || [])[1];
   var antes = (/aria-label="Antes:\s*([^"]*)"/.exec(bloco) || [])[1];
-  var agora = (/aria-label="Agora:\s*([^"]*)"/.exec(bloco) || [])[1];
+  var agora = (/aria-label="(?:Agora|Ahora):\s*([^"]*)"/.exec(bloco) || [])[1];
   var foto = (/class="poly-component__picture"[^>]*?\s(?:data-src|src)="(https:\/\/[^"]*mlstatic\.com\/[^"]+)"/.exec(bloco) || [])[1];
   var id = (/[?&#;]wid=(ML[A-Z]\d+)/.exec(bloco) || /item_id%3A(ML[A-Z]\d+)/.exec(bloco) || [])[1];
   // "ou R$ 176,32 em 5x sem juros": total no cartão (aparece quando o preço principal é o do Pix).
   var p = bloco.indexOf('poly-price__installments');
-  var parcelas = p >= 0 ? (/aria-label="([^"]*reais[^"]*)"/.exec(bloco.substr(p, 1500)) || [])[1] : null;
+  var parcelas = p >= 0 ? (/aria-label="([^"]*(?:reais|reales)[^"]*)"/.exec(bloco.substr(p, 1500)) || [])[1] : null;
   return {
     titulo: titulo ? decodificarEntidades_(titulo).trim() : null,
     preco: valorRotulo_(agora),

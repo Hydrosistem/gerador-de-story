@@ -159,3 +159,11 @@ test('total no cartão igual ao preço não conta como preço no cartão', () =>
   const html = fx('social-pix.html').replace('"value":176.32', '"value":167.5');
   assert.equal(ctx.parseSocial(html).precoCartao, null);
 });
+
+// O ML às vezes escreve as legendas dos preços em espanhol ("Ahora: 94 reales con 90 centavos").
+test('cartão com legendas em espanhol traz preço, antigo e cartão ("em outros meios")', () => {
+  const r = plain(ctx.parseSocial(fx('social-cartao-espanhol.html')));
+  assert.equal(r.preco, 94.9);
+  assert.equal(r.precoAntigo, 265);
+  assert.equal(r.precoCartao, 99.9);
+});
