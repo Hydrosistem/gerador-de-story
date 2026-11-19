@@ -189,6 +189,7 @@ details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[op
     <option value="400|Bangers">Bangers (gibi)</option>
     <option value="400|Lobster">Lobster (cursiva, como digitado)</option>
     <option value="400|Pacifico">Pacifico (manuscrita, como digitado)</option>
+    <option value="italic 400|Bodoni Moda">Bodoni Moda itálica (elegante)</option>
    </select></div>
    <div class="field"><label for="brandColor">Cor da marca</label><input id="brandColor" type="color" value="#ffc61a"></div>
   </div>
@@ -489,7 +490,15 @@ function drawTopElegante(){
   ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillText(pill,EL.X+17,y+1);ctx.letterSpacing='0px';
  }
  let xr=EL.R;ctx.textAlign='right';
- if(marca){ctx.font=`italic 400 54px ${F_SERIF}`;ctx.fillStyle='rgba(244,239,230,.9)';shadowed(()=>ctx.fillText(marca,xr,y),10,2,'rgba(0,0,0,.35)');xr-=ctx.measureText(marca).width+14}
+ ctx.font=`500 21px ${F_SANS}`;ctx.letterSpacing='4px';const pw=pill?ctx.measureText(pill).width+34:0;ctx.letterSpacing='0px';
+ const lw=logoImg?logoImg.width*64/logoImg.height+14:0;
+ if(marca){
+  // Fonte, cor e tamanho escolhidos em "Identidade da arte"; encolhe se encostar no selo
+  const fam=brandFamily(),comoDigitado=/Bodoni|Lobster|Pacifico/.test($('brandFont').value),txt=comoDigitado?marca:$('brand').value.trim().toUpperCase();
+  const maxW=EL.R-EL.X-(pw?pw+30:0)-lw;let fs=+$('brandSize').value||54;
+  do{ctx.font=`${fam.w} ${fs}px ${fam.f}`;if(ctx.measureText(txt).width<=maxW)break;fs-=2}while(fs>20);
+  ctx.fillStyle=$('brandColor').value||'#f4efe6';shadowed(()=>ctx.fillText(txt,xr,y),10,2,'rgba(0,0,0,.35)');xr-=ctx.measureText(txt).width+14;
+ }
  if(logoImg){const h=64,w=logoImg.width*h/logoImg.height;ctx.drawImage(logoImg,xr-w,y-h/2,w,h)}
  ctx.textAlign='left';
 }
@@ -735,6 +744,15 @@ function carregarFontesElegante(){
   document.fonts.load(`500 28px ${F_SANS}`),document.fonts.load(`400 27px ${F_SANS}`)]).then(draw).catch(()=>{});
 }
 $('modelo').addEventListener('change',carregarFontesElegante);setTimeout(carregarFontesElegante,0);
+// Cada modelo tem a sua marca padrão. Ao trocar de modelo, só troca o que ainda estiver no padrão do outro
+// (o que a pessoa personalizou fica como está).
+const PADRAO_MARCA={impacto:{brandFont:'400|Anton',brandColor:'#ffc61a',brandSize:'46'},elegante:{brandFont:'italic 400|Bodoni Moda',brandColor:'#f4efe6',brandSize:'54'}};
+function trocarPadroesMarca(){
+ const novo=$('modelo').value==='elegante'?'elegante':'impacto',velho=novo==='elegante'?'impacto':'elegante';
+ for(const k in PADRAO_MARCA[novo]){if(String($(k).value).toLowerCase()===PADRAO_MARCA[velho][k].toLowerCase())$(k).value=PADRAO_MARCA[novo][k]}
+ loadBrandFont();
+}
+$('modelo').addEventListener('change',trocarPadroesMarca);
 function loadBrandFont(){const b=brandFamily();$('brandSizeVal').textContent=$('brandSize').value;document.fonts.load(`${b.w} 46px ${b.f}`).then(draw).catch(()=>{})}
 $('brandFont').addEventListener('change',loadBrandFont);setTimeout(loadBrandFont,0);
 // Logo da marca: guardado neste navegador

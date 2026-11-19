@@ -114,3 +114,18 @@ test('preço no cartão puxado do link vai para o campo', () => {
 test('chave recusada abre as Configurações da IA', () => {
   assert.match(html, /if\(!cfg\.key\|\|\/recusou a chave\/\.test\(e\.message\|\|''\)\)\$\('cfg'\)\.open=true/);
 });
+
+test('marca no Elegante respeita fonte, tamanho e cor escolhidos', () => {
+  assert.match(html, /<option value="italic 400\|Bodoni Moda">[^<]+<\/option>/);
+  const ini = html.indexOf('function drawTopElegante');
+  const corpo = html.slice(ini, html.indexOf('\n}', ini));
+  assert.match(corpo, /brandFamily\(\)/);
+  assert.match(corpo, /\$\('brandSize'\)\.value/);
+  assert.match(corpo, /\$\('brandColor'\)\.value/);
+});
+
+test('trocar de modelo troca a marca para o padrão do outro modelo só se não foi personalizada', () => {
+  assert.match(html, /const PADRAO_MARCA=\{impacto:\{brandFont:'400\|Anton',brandColor:'#ffc61a',brandSize:'46'\},elegante:\{brandFont:'italic 400\|Bodoni Moda',brandColor:'#f4efe6',brandSize:'54'\}\}/);
+  assert.match(html, /function trocarPadroesMarca\(\)/);
+  assert.match(html, /\$\('modelo'\)\.addEventListener\('change',trocarPadroesMarca\)/);
+});
