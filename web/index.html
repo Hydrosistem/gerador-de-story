@@ -78,7 +78,10 @@ details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[op
 #avisoLogin{font-size:13px;color:var(--muted);white-space:pre-line}#avisoLogin:empty{display:none}#avisoLogin.erro{color:#b42318}
 .exemplo{display:grid;gap:8px;justify-items:center;margin-top:4px}
 .exemplo .etiqueta{font-size:11.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
-.exemplo img{width:min(240px,70vw);height:auto;aspect-ratio:9/16;border-radius:16px;border:4px solid #fff;box-shadow:0 10px 30px rgba(16,24,40,.18);background:#d9d5cc}
+.exemplos{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:min(480px,100%)}
+.exemplos figure{margin:0;display:grid;gap:6px;justify-items:center}
+.exemplos img{width:100%;height:auto;aspect-ratio:9/16;border-radius:14px;border:3px solid #fff;box-shadow:0 10px 30px rgba(16,24,40,.18);background:#d9d5cc}
+.exemplos figcaption{font-size:12.5px;font-weight:700;color:var(--muted)}
 .passos{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:4px 0 0;padding:0;list-style:none}
 .passos li{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px 7px 7px;font-size:13.5px;font-weight:600}
 .passos b{width:22px;height:22px;border-radius:50%;background:var(--wa);color:#fff;display:grid;place-items:center;font-size:12px}
@@ -116,8 +119,11 @@ details.cfg summary{cursor:pointer;font-weight:700;font-size:13px}details.cfg[op
  <div id="botaoGoogle"></div>
  <p class="aceite">Ao entrar, você concorda com a <a href="privacidade.html">Política de Privacidade</a>.</p>
  <div class="exemplo">
-  <span class="etiqueta">Exemplo</span>
-  <img src="exemplo-story.jpg" alt="Exemplo de arte de Status: boné por R$ 39,90 com selo de desconto" width="270" height="480" loading="lazy">
+  <span class="etiqueta">Exemplos</span>
+  <div class="exemplos">
+   <figure><img src="exemplo-impacto.jpg" alt="Modelo Impacto: boné por R$ 39,90 com etiqueta e selo de desconto" width="270" height="480" loading="lazy"><figcaption>Impacto</figcaption></figure>
+   <figure><img src="exemplo-elegante.jpg" alt="Modelo Elegante: boné por R$ 39,90 no Pix com letras finas e tons neutros" width="270" height="480" loading="lazy"><figcaption>Elegante</figcaption></figure>
+  </div>
  </div>
  <ol class="passos">
   <li><b>1</b>Cole o link</li>

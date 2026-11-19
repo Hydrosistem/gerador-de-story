@@ -64,8 +64,9 @@ test('link sem preço avisa para digitar o preço antes de publicar', () => {
 
 test('tela de entrada tem exemplo de arte e os 3 passos, no estilo do Post', () => {
   const login = html.slice(html.indexOf('<div id="telaLogin"'), html.indexOf('<main id="app"'));
-  assert.match(login, /<img src="exemplo-story\.jpg"/);
-  assert.ok(existe('exemplo-story.jpg'), 'web/exemplo-story.jpg não existe');
+  // Os dois modelos lado a lado: Impacto e Elegante
+  assert.match(login, /<div class="exemplos">[\s\S]*<img src="exemplo-impacto\.jpg"[\s\S]*<figcaption>Impacto<\/figcaption>[\s\S]*<img src="exemplo-elegante\.jpg"[\s\S]*<figcaption>Elegante<\/figcaption>/);
+  assert.ok(existe('exemplo-impacto.jpg') && existe('exemplo-elegante.jpg'), 'imagens de exemplo não existem');
   for (const passo of ['Cole o link', 'Gere o cenário', 'Baixe a arte']) assert.ok(login.includes(passo), passo);
 });
 
